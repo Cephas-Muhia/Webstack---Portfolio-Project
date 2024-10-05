@@ -1,0 +1,24 @@
+{
+  "name": "creme-de-cake-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Cephas",
+  "license": "ISC",
+  "description": "A web application for browsing, customizing, and ordering cakes.",
+  "dependencies": {
+    "@aws-sdk/credential-providers": "^3.665.0",
+    "@mongodb-js/zstd": "^1.2.2",
+    "cookie": "^0.7.1",
+    "express": "^4.21.0",
+    "gcp-metadata": "^6.1.0",
+    "kerberos": "^2.2.0",
+    "mongodb-client-encryption": "^6.1.0",
+    "mongoose": "^8.7.0",
+    "snappy": "^7.2.2",
+    "socks": "^2.8.3"
+  }
+}
