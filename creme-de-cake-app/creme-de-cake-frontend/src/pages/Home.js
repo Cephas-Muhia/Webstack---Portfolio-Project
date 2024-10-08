@@ -7,9 +7,9 @@ function Home() {
     <div 
       className="d-flex flex-column justify-content-center align-items-center" 
       style={{ 
-        backgroundColor: '#e4ab63', 
-        minHeight: '100vh',  // Change from 100vh to min-height
-        color: '#fff', 
+        backgroundColor: '#f5e1a4',  // Example color from the image (light yellowish cream)
+        minHeight: '100vh',  // Change from 100vh to min-height for better responsiveness
+        color: '#3e2c41',  // Example dark brown color from the image
         padding: '20px' 
       }}
     >
@@ -32,7 +32,7 @@ function Home() {
           <Link 
             to="/catalogue" 
             className="btn btn-lg btn-dark" 
-            style={{ backgroundColor: '#5a3f2d' }}
+            style={{ backgroundColor: '#3e2c41' }} // Dark brown button
           >
             Explore Our Cakes
           </Link>
@@ -44,7 +44,7 @@ function Home() {
         <div className="row justify-content-center">
           <div className="col-12 col-md-8">
             <img
-              src="https://via.placeholder.com/800x400"  // Replace this with your image URL
+              src="/images/image1.jpg"  // Correct path to your local image
               alt="Delicious Cakes"
               className="img-fluid rounded shadow-lg"
               style={{
