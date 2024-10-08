@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack'); // Import webpack for DefinePlugin
 
 module.exports = {
   entry: './src/index.js', // Your entry point for React
@@ -18,6 +19,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html', // This points to your 'index.html' in the 'public' folder
       filename: 'index.html', // Ensure this is set correctly
+    }),
+    // Define environment variables globally
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(process.env),
     }),
   ],
   module: {

@@ -44,7 +44,7 @@ function Catalogue() {
         {/* Title and description */}
         <h1 className="display-4 font-weight-bold mb-3">Cake Wonderland</h1>
         <p className="lead mb-4">
-          Browse our amazing collection of cakes!
+          Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
         </p>
       </div>
 
@@ -54,7 +54,7 @@ function Catalogue() {
           <div className="col-md-4 mb-4" key={cake.id}>
             <div className="card shadow" style={{ borderRadius: '10px' }}>
               <img
-                src={cake.imgUrl}
+                src={process.env.PUBLIC_URL + cake.imgUrl}
                 className="card-img-top"
                 alt={cake.name}
                 style={{ borderRadius: '10px 10px 0 0' }}
