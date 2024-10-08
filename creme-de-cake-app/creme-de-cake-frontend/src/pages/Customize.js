@@ -1,0 +1,95 @@
+import React, { useState } from 'react';
+
+function Customize() {
+  const [icing, setIcing] = useState('');
+  const [size, setSize] = useState(1);
+  const [decorations, setDecorations] = useState([]);
+
+  const handleIcingChange = (event) => setIcing(event.target.value);
+  const handleSizeChange = (event) => setSize(event.target.value);
+  const handleDecorationChange = (event) => {
+    const value = event.target.value;
+    setDecorations((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    );
+  };
+
+  const handleSubmit = () => {
+    alert(`Cake Customized! Icing: ${icing}, Size: ${size}kg, Decorations: ${decorations.join(', ')}`);
+  };
+
+  return (
+    <div className="container" style={{ backgroundColor: '#e4ab63', minHeight: '100vh' }}>
+      <h1 className="text-center text-white">Customize Your Cake</h1>
+      <p className="text-center text-white lead">Choose your icing, size, and decorations.</p>
+
+      {/* Icing Selection */}
+      <div className="mb-4">
+        <label className="form-label text-white">Select Icing</label>
+        <select className="form-select" value={icing} onChange={handleIcingChange}>
+          <option value="">Choose icing...</option>
+          <option value="Hard Icing">Hard Icing</option>
+          <option value="Soft Icing">Soft Icing</option>
+          <option value="Fresh Cream">Fresh Cream</option>
+        </select>
+      </div>
+
+      {/* Cake Size Selection */}
+      <div className="mb-4">
+        <label className="form-label text-white">Select Cake Size (kg)</label>
+        <input
+          type="range"
+          className="form-range"
+          min="1"
+          max="5"
+          value={size}
+          onChange={handleSizeChange}
+        />
+        <p className="text-center text-white">{size} kg</p>
+      </div>
+
+      {/* Decorations Selection */}
+      <div className="mb-4">
+        <label className="form-label text-white">Choose Decorations</label>
+        <div>
+          <input
+            type="checkbox"
+            value="Sprinkles"
+            onChange={handleDecorationChange}
+            className="me-2"
+          />
+          <label className="text-white">Sprinkles</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            value="Flowers"
+            onChange={handleDecorationChange}
+            className="me-2"
+          />
+          <label className="text-white">Flowers</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            value="Candles"
+            onChange={handleDecorationChange}
+            className="me-2"
+          />
+          <label className="text-white">Candles</label>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <button onClick={handleSubmit} className="btn btn-dark" style={{ backgroundColor: '#5a3f2d' }}>
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default Customize;
+
+
