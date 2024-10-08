@@ -1,6 +1,7 @@
 import React from 'react'; 
 import { Link } from 'react-router-dom'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../styles.css';  // Import the styles
 
 function Navbar() {
   return (
@@ -8,11 +9,11 @@ function Navbar() {
       <div className="container">
         {/* Brand Logo or Text */}
         <Link className="navbar-brand" to="/" style={{ fontSize: '1.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-          {/* Optional logo image */}
+          {/* Logo with hover effect */}
           <img 
-            src="/images/logo.png"  // Add your logo here
-            alt="logo.Cake"
-            style={{ width: '40px', height: '40px', marginRight: '10px' }} // Adjust logo size
+            src="/images/logo.png"  // Path to your logo
+            alt="Cre`me de Cake"
+            className="logo"  // Add a class for the logo to style it
           />
           Cre`me de Cake App
         </Link>
@@ -71,5 +72,4 @@ function Navbar() {
 }
 
 export default Navbar;
-
 

@@ -36,6 +36,30 @@ body {
   color: #f5e1a4;  /* Active link color */
 }
 
+/* Navbar Logo Styling */
+.logo {
+  width: 50px;
+  height: 50px;
+  transition: transform 0.3s ease, filter 0.3s ease; /* Add transition for smooth hover effect */
+  filter: brightness(0.95); /* Slightly brighten the logo */
+}
+
+.logo:hover {
+  transform: scale(1.2); /* Enlarge logo on hover */
+  filter: brightness(1.1); /* Brighten the logo on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow on hover */
+}
+
+/* Navbar Link Styling */
+.nav-link {
+  color: #fff; /* Keep links white */
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #e4ab63; /* Change color to theme highlight on hover */
+}
+
 /* Optional: Navbar Toggler Button */
 .navbar-toggler {
   border-color: #f5e1a4; /* Toggler button color */
