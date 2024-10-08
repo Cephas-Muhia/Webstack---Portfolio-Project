@@ -39,20 +39,20 @@ function Checkout() {
   };
 
   const handleOrderConfirmation = () => {
-    // Here you would handle order submission, like sending the data to the backend.
-    alert('Your order has been confirmed!');
+    // Simulate order confirmation (e.g., submit order to backend)
+    alert('Your order has been confirmed! We will send you a confirmation email.');
   };
 
   return (
-    <div className="container" style={{ backgroundColor: '#e4ab63', minHeight: '100vh' }}>
-      <h1 className="text-center text-white">Proceed to Checkout Delight</h1>
-      <p className="text-center text-white lead">Confirm your order and payment.</p>
+    <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>
+      <h1 className="text-center text-white mt-5">Proceed to Checkout Delight</h1>
+      <p className="text-center text-white lead mb-4">Confirm your order and payment details below.</p>
 
       {/* Order Summary */}
       <div className="mb-4">
         <h3 className="text-white">Order Summary</h3>
         {cartItems.map((item) => (
-          <div key={item.id} className="card mb-3">
+          <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff' }}>
             <div className="card-body">
               <h5 className="card-title">{item.name}</h5>
               <p className="card-text">
