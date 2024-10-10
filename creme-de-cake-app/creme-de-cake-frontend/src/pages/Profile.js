@@ -70,8 +70,20 @@ const Profile = () => {
             style={{ borderRadius: '50%', width: '150px', height: '150px', objectFit: 'cover', marginBottom: '1rem' }}
           />
           {isEditing && (
-            <Form.Group controlId="formProfilePhoto" className="text-center">
-              <Form.Label style={{ fontFamily: 'Poppins, sans-serif', color: '#3e2c41' }}>Upload Profile Photo</Form.Label>
+            <Form.Group controlId="Registration" className="text-center">
+              <Form.Group controlId="Registration" className="text-center">
+  <Form.Label
+    style={{
+      fontFamily: 'Poppins, sans-serif',
+      color: '#3e2c41',
+      fontWeight: 'bold', // Bold font
+      fontSize: '1.2rem', // Optional: Increase font size for emphasis
+    }}
+  >
+    "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more! It’s quick, easy, and tailored just for you – register now and make your cake experience even sweeter!" 🎂✨
+  </Form.Label>
+</Form.Group>
+
               <Form.Control type="file" onChange={handlePhotoUpload} style={{ display: 'block', margin: 'auto' }} />
             </Form.Group>
           )}
