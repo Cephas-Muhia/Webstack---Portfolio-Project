@@ -27,7 +27,7 @@ function Catalogue() {
     { id: 21, name: 'Chocolate Chip Cake', description: 'A soft and fluffy cake loaded with chocolate chips, offering bursts of melted chocolate with every bite.', imgUrl: '/images/chocolate-chip-cake.jpg' },
     { id: 22, name: 'Royal Velvet Cake', description: 'An elegant variation of the classic red velvet, richer in flavor with sophisticated frosting and decoration.', imgUrl: '/images/royal-velvet-cake.jpg' },
     { id: 23, name: 'Amarula Cake', description: 'A moist cake flavored with Amarula cream liqueur, perfect for a boozy dessert experience.', imgUrl: '/images/amarula-cake.jpg' },
-    { id: 24, name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' }
+    { id: 24, name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
   return (
@@ -54,7 +54,7 @@ function Catalogue() {
           <div className="col-md-4 mb-4" key={cake.id}>
             <div className="card shadow" style={{ borderRadius: '10px' }}>
               <img
-                src={process.env.PUBLIC_URL + cake.imgUrl}
+                src={cake.imgUrl} // Directly use the relative path to public folder
                 className="card-img-top"
                 alt={cake.name}
                 style={{ borderRadius: '10px 10px 0 0' }}
@@ -79,5 +79,4 @@ function Catalogue() {
 }
 
 export default Catalogue;
-
 

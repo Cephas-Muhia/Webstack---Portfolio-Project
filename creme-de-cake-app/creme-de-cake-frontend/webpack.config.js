@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack'); // Import webpack for DefinePlugin
 
 module.exports = {
-  entry: './src/index.js', // Your entry point for React
+  entry: './src/index.js', // Entry point for React
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js', // This will be your bundled output file
