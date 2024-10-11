@@ -1,10 +1,12 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import '../styles.css'; // Assuming the same styles apply here
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for React Router v6
+import '../styles.css';
 
 function Cart() {
-  // Sample cart items, ideally, this would be passed in or fetched from state
-  const cartItems = [
+  const navigate = useNavigate(); // Initialize navigate for programmatic navigation
+
+  // Sample cart items (this should ideally come from your state or a context)
+  const initialCartItems = [
     {
       id: 1,
       name: 'Chocolate Cake',
@@ -15,7 +17,7 @@ function Cart() {
       AdditionalDescription: 'Rich chocolate with layers of fudge.',
       image: '/images/freshcream.jpg',
       customMessage: 'Happy Birthday John!',
-      preferredColors: ['Brown', 'Gold'], 
+      preferredColors: ['Brown', 'Gold'],
       price: 1500,
     },
     {
@@ -28,10 +30,23 @@ function Cart() {
       AdditionalDescription: 'Classic vanilla with a hint of buttercream.',
       image: '/images/softicing.jpg',
       customMessage: 'Congratulations!',
-      preferredColors: ['White', 'Silver'], 
+      preferredColors: ['White', 'Silver'],
       price: 1200,
     },
   ];
+
+  const [cartItems, setCartItems] = useState(initialCartItems);
+
+  // Function to remove item from cart
+  const removeItemFromCart = (id) => {
+    setCartItems(cartItems.filter(item => item.id !== id));
+  };
+
+  // Function to handle editing (redirect to Customize page)
+  const handleEditItem = (item) => {
+    // You can pass the item details as state or in the URL (depending on how you handle editing)
+    navigate('/customize', { state: { item } });
+  };
 
   // Calculate total price for all items in the cart
   const calculateTotalPrice = () => {
@@ -65,12 +80,28 @@ function Cart() {
                       <strong>Icing:</strong> {item.icing}<br />
                       <strong>Size:</strong> {item.size} kg<br />
                       <strong>Shape:</strong> {item.shape}<br />
-                      <strong>CelebrationExtras:</strong> {item.CelebrationExtras.join(', ')}<br />
-                      <strong>Additional cake Description:</strong> {item.CakeDescription}<br />
+                      <strong>Celebration Extras:</strong> {item.CelebrationExtras.join(', ')}<br />
+                      <strong>Additional Description:</strong> {item.AdditionalDescription}<br />
                       <strong>Custom Message:</strong> {item.customMessage}<br />
-                      <strong>Preferred Colors:</strong> {item.preferredColors.join(', ')}<br /> {/* New field */}
+                      <strong>Preferred Colors:</strong> {item.preferredColors.join(', ')}<br />
                       <strong>Price:</strong> Ksh {item.price}
                     </p>
+                    {/* Edit and Remove Buttons */}
+                    <div className="d-flex justify-content-between">
+                      <button
+                        onClick={() => handleEditItem(item)} // Redirect to Customize page
+                        className="btn"
+                        style={{ backgroundColor: '#4CAF50', color: '#fff' }} // Updated button color
+                      >
+                        Edit Item
+                      </button>
+                      <button
+                        onClick={() => removeItemFromCart(item.id)}
+                        className="btn btn-danger"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
