@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles.css'; // Assuming the same styles apply here
 
 function Checkout() {
@@ -9,7 +9,12 @@ function Checkout() {
       name: 'Chocolate Cake',
       icing: 'Fresh Cream',
       size: 2,
-      decorations: ['Sprinkles', 'Candles'],
+      shape: 'Round',
+      celebrationExtras: ['Sprinkles', 'Candles'],
+      additionalDescription: 'Rich chocolate with layers of fudge.',
+      image: '/images/freshcream.jpg',
+      customMessage: 'Happy Birthday John!',
+      preferredColors: ['Brown', 'Gold'],
       price: 1500,
     },
     {
@@ -17,7 +22,12 @@ function Checkout() {
       name: 'Vanilla Cake',
       icing: 'Soft Icing',
       size: 1.5,
-      decorations: ['Flowers'],
+      shape: 'Square',
+      celebrationExtras: ['Floral Touch'],
+      additionalDescription: 'A classic vanilla cake with a soft touch.',
+      image: '/images/vanilla.jpg',
+      customMessage: 'Happy Anniversary!',
+      preferredColors: ['White', 'Pink'],
       price: 1200,
     },
   ]);
@@ -32,6 +42,15 @@ function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState('');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
+
+  const [orderDate, setOrderDate] = useState(''); // State to hold order date and time
+  const [deliveryDate, setDeliveryDate] = useState(''); // State to hold delivery date and time
+
+  useEffect(() => {
+    // Set the current date and time for the order
+    const currentDate = new Date().toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
+    setOrderDate(currentDate); // Set order date to current date and time
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,8 +81,11 @@ function Checkout() {
       {!orderConfirmed ? (
         <>
           <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '30px' }}>
-            Proceed to Checkout Delight
+            Checkout Delight
           </h1>
+         <h2 className="text-center" style={{ color: '#3e2c41', marginTop: '30px' }}>
+            Finalize Your Sweet journey
+          </h2>
           <p className="text-center" style={{ color: '#3e2c41', marginBottom: '40px' }}>
             Confirm your order and payment details below.
           </p>
@@ -75,10 +97,15 @@ function Checkout() {
               <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff' }}>
                 <div className="card-body">
                   <h5 className="card-title" style={{ color: '#3e2c41' }}>{item.name}</h5>
+                  <img src={item.image} alt={item.name} className="img-fluid" style={{ maxWidth: '200px', marginBottom: '20px' }} />
                   <p className="card-text" style={{ color: '#3e2c41' }}>
                     <strong>Icing:</strong> {item.icing}<br />
                     <strong>Size:</strong> {item.size} kg<br />
-                    <strong>Decorations:</strong> {item.decorations.join(', ')}<br />
+                    <strong>Shape:</strong> {item.shape}<br />
+                    <strong>Celebration Extras:</strong> {item.celebrationExtras.join(', ')}<br />
+                    <strong>Additional Description:</strong> {item.additionalDescription}<br />
+                    <strong>Custom Message:</strong> {item.customMessage}<br />
+                    <strong>Preferred Colors:</strong> {item.preferredColors.join(', ')}<br />
                     <strong>Price:</strong> Ksh {item.price}
                   </p>
                 </div>
@@ -150,6 +177,17 @@ function Checkout() {
             </form>
           </div>
 
+          {/* Delivery/Pickup Date and Time */}
+          <div className="mb-4">
+            <h3 style={{ color: '#3e2c41' }}>Delivery/Pickup Date and Time</h3>
+            <input
+              type="datetime-local"
+              value={deliveryDate}
+              onChange={(e) => setDeliveryDate(e.target.value)} // Update delivery date
+              className="form-control"
+            />
+          </div>
+
           {/* Payment Section */}
           <div className="mb-4">
             <h3 style={{ color: '#3e2c41' }}>Payment Method</h3>
@@ -192,33 +230,11 @@ function Checkout() {
           </div>
         </>
       ) : (
-        <div className="order-summary">
-          <h3 style={{ color: '#3e2c41' }}>Order Summary</h3>
-          <div>
-            <h4 style={{ color: '#3e2c41' }}>Cake Details</h4>
-            {cartItems.map((item) => (
-              <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff' }}>
-                <div className="card-body">
-                  <h5 className="card-title" style={{ color: '#3e2c41' }}>{item.name}</h5>
-                  <p className="card-text" style={{ color: '#3e2c41' }}>
-                    <strong>Icing:</strong> {item.icing}<br />
-                    <strong>Size:</strong> {item.size} kg<br />
-                    <strong>Decorations:</strong> {item.decorations.join(', ')}<br />
-                    <strong>Price Breakdown:</strong> Ksh {item.price}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <h4 style={{ color: '#3e2c41' }}>Customer Information</h4>
-          <p style={{ color: '#3e2c41' }}><strong>Name:</strong> {customerInfo.name}</p>
-          <p style={{ color: '#3e2c41' }}><strong>Email:</strong> {customerInfo.email}</p>
-          <p style={{ color: '#3e2c41' }}><strong>Phone:</strong> {customerInfo.phone}</p>
-          <p style={{ color: '#3e2c41' }}><strong>Address:</strong> {customerInfo.address}</p>
-          <p style={{ color: '#3e2c41' }}><strong>Special Instructions:</strong> {customerInfo.specialInstructions || 'None'}</p>
-
-          <h4 style={{ color: '#3e2c41' }}>Total Price: Ksh {calculateTotalPrice()}</h4>
+        <div className="mt-4 text-center">
+          <h1 style={{ color: '#3e2c41' }}>Order Confirmed!</h1>
+          <p style={{ color: '#3e2c41' }}>Your order has been successfully placed.</p>
+          <p style={{ color: '#3e2c41' }}><strong>Order Date & Time:</strong> {orderDate}</p>
+          <p style={{ color: '#3e2c41' }}><strong>Delivery/Pickup Date & Time:</strong> {deliveryDate}</p>
         </div>
       )}
     </div>
