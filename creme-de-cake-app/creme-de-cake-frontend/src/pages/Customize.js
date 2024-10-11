@@ -162,7 +162,7 @@ function Customize() {
 
       {/* Cake Color Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Select your preffered Cake Color/Colors</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Select your preferred Cake Color/Colors</label>
         <select multiple className="form-select" value={colors} onChange={handleColorChange}>
           <option value="Red">Red</option>
           <option value="Blue">Blue</option>

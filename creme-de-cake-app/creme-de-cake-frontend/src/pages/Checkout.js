@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import '../styles.css'; // Assuming the same styles apply here
 
 function Checkout() {
+  // Cart items will be passed in from the Cart page or fetched from a global state
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -28,6 +30,7 @@ function Checkout() {
     specialInstructions: '',
   });
 
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
 
   const handleChange = (e) => {
@@ -38,11 +41,19 @@ function Checkout() {
     });
   };
 
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+  };
+
   const calculateTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price, 0);
   };
 
   const handleOrderConfirmation = () => {
+    if (!paymentMethod) {
+      alert('Please select a payment method.');
+      return;
+    }
     setOrderConfirmed(true);
   };
 
@@ -144,10 +155,22 @@ function Checkout() {
             <h3 style={{ color: '#3e2c41' }}>Payment Method</h3>
             <div>
               <label style={{ color: '#3e2c41' }}>
-                <input type="radio" name="payment" /> Mpesa
+                <input
+                  type="radio"
+                  name="payment"
+                  value="Mpesa"
+                  checked={paymentMethod === 'Mpesa'}
+                  onChange={handlePaymentMethodChange}
+                /> Mpesa
               </label><br />
               <label style={{ color: '#3e2c41' }}>
-                <input type="radio" name="payment" /> Cash on Delivery
+                <input
+                  type="radio"
+                  name="payment"
+                  value="Cash on Delivery"
+                  checked={paymentMethod === 'Cash on Delivery'}
+                  onChange={handlePaymentMethodChange}
+                /> Cash on Delivery
               </label><br />
             </div>
           </div>
@@ -181,7 +204,6 @@ function Checkout() {
                     <strong>Icing:</strong> {item.icing}<br />
                     <strong>Size:</strong> {item.size} kg<br />
                     <strong>Decorations:</strong> {item.decorations.join(', ')}<br />
-                    <strong>Quantity:</strong> {cartItems.length}<br />
                     <strong>Price Breakdown:</strong> Ksh {item.price}
                   </p>
                 </div>
