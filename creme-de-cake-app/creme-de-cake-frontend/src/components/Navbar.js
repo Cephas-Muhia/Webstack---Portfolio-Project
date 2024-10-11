@@ -1,9 +1,14 @@
-import React from 'react'; 
-import { Link } from 'react-router-dom'; 
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles.css';  // Import the styles
 
 function Navbar() {
+  const location = useLocation(); // Get the current location
+
+  // Function to determine if the current route matches the link
+  const isActive = (path) => location.pathname === path ? 'active' : '';
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark" style={{ backgroundColor: '#5a3f2d' }}>
       <div className="container">
@@ -35,32 +40,32 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/')}`} to="/" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Home
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/catalogue" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/catalogue')}`} to="/catalogue" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Catalogue
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/customize" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/customize')}`} to="/customize" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Customize Cake
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/cart" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/cart')}`} to="/cart" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Cart
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/checkout" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/checkout')}`} to="/checkout" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Checkout
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/profile" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
+              <Link className={`nav-link ${isActive('/profile')}`} to="/profile" style={{ textTransform: 'uppercase', fontWeight: '500' }}>
                 Profile
               </Link>
             </li>
