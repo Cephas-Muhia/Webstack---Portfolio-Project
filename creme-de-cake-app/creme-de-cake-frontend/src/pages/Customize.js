@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 function Customize() {
+  const { id } = useParams(); // Capture the cake ID from the URL
+
+  // State variables
   const [icing, setIcing] = useState('');
   const [size, setSize] = useState(1);
   const [flavors, setFlavors] = useState([]);
@@ -12,23 +16,28 @@ function Customize() {
   const [description, setDescription] = useState('');
   const [colors, setColors] = useState([]);
 
+  // Event handler functions
   const handleIcingChange = (event) => setIcing(event.target.value);
   const handleSizeChange = (event) => setSize(event.target.value);
+  
   const handleFlavorChange = (event) => {
     const value = event.target.value;
     setFlavors((prev) => {
-      if (prev.includes(value)) return prev.filter((item) => item !== value);
-      if (prev.length < 3) return [...prev, value];
-      return prev;
+      if (prev.includes(value)) return prev.filter((item) => item !== value); // Remove if selected again
+      if (prev.length < 3) return [...prev, value]; // Add new flavor if less than 3 selected
+      return prev; // Do nothing if more than 3 flavors
     });
   };
+
   const handleCustomFlavorChange = (event) => setCustomFlavor(event.target.value);
+  
   const handleDecorationChange = (event) => {
     const value = event.target.value;
     setDecorations((prev) =>
       prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
     );
   };
+
   const handleShapeChange = (event) => setShape(event.target.value);
   const handleMessageChange = (event) => setMessage(event.target.value);
   const handleDescriptionChange = (event) => setDescription(event.target.value);

@@ -225,22 +225,30 @@ function Checkout() {
           </div>
 
           {/* Total Price and Order Confirmation */}
-          <div className="d-flex justify-content-between align-items-center">
-            <h4 style={{ color: '#3e2c41' }}>Total: Ksh {calculateTotalPrice()}</h4>
-            <button className="btn btn-primary" onClick={handleOrderConfirmation} style={{ backgroundColor: '#3e2c41' }}>
-              Finalize and Order
-            </button>
-          </div>
-        </>
-      ) : (
-        <div className="text-center mt-5">
-          <h2 style={{ color: '#3e2c41' }}>Order Confirmed!</h2>
-          <p style={{ color: '#3e2c41', fontSize: '18px' }}>Your order is being processed. You'll receive an email confirmation shortly!</p>
+        <div className="d-flex justify-content-between align-items-center">
+        <h4 style={{ color: '#3e2c41' }}>Total: Ksh {calculateTotalPrice()}</h4>
+        <button className="btn btn-primary" onClick={handleOrderConfirmation} style={{ backgroundColor: '#3e2c41' }}>
+           Finalize and Order
+        </button>
         </div>
-      )}
-    </div>
-  );
+        </>
+        ) : (
+        <div className="text-center mt-5">
+        <h2 style={{ color: '#3e2c41' }}>Order Confirmed!</h2>
+        <p style={{ color: '#3e2c41', fontSize: '18px' }}>
+        Your order is being processed. You'll receive an email confirmation shortly!
+         </p>
+    <img
+      src="/images/logo.png"
+      alt="Company Logo"
+      style={{ width: '150px', margin: '20px 0' }} // Adjust the width and margin as needed
+    />
+   </div>
+  )}
+ </div>
+);
 }
 
 export default Checkout;
+
 

@@ -7,6 +7,7 @@ import Customize from './pages/Customize';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
+import './styles.css'; // Ensure your styles are included
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/customize" element={<Customize />} />
+          <Route path="/customize/:id" element={<Customize />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
