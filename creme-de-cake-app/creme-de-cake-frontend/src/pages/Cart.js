@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for React Router v6
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../styles.css';
 
 function Cart() {
   const navigate = useNavigate(); // Initialize navigate for programmatic navigation
+  const location = useLocation(); // To get passed state from Customize.js
 
   // Sample cart items (this ideally come from state or a context)
   const initialCartItems = [
@@ -31,26 +32,41 @@ function Cart() {
       image: '/images/softicing.jpg',
       customMessage: 'Congratulations!',
       preferredColors: ['White', 'Silver'],
-      price: 1200,
+      price: 1200, // Fixed the repeated line issue
     },
   ];
 
+  // Initialize cartItems with initialCartItems
   const [cartItems, setCartItems] = useState(initialCartItems);
 
-  // Function to remove item from cart
+  // Check if a custom cake is passed from the Customize.js page
+  useEffect(() => {
+    if (location.state?.customCake) {
+      const newCake = {
+        id: cartItems.length + 1, // Increment ID based on current cart size
+        name: 'Custom Cake', // Default name for custom cakes
+        ...location.state.customCake, // Spread the custom cake details from state
+        price: 2000, // Placeholder price, update with real pricing logic later
+      };
+
+      // Add the new custom cake to the cart
+      setCartItems(prevCartItems => [...prevCartItems, newCake]);
+    }
+  }, [location.state, cartItems.length]);
+
+  // Function to remove an item from the cart by ID
   const removeItemFromCart = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+    setCartItems(prevCartItems => prevCartItems.filter(item => item.id !== id));
   };
 
-  // Function to handle editing (redirect to Customize page)
-  // pass the item details as state or in the URL (depending on how you handle editing) 
-  const handleEditItem = (item) => {
-    navigate('/customize', { state: { item } }); // Pass item details to Customize page
-  };
-
-  // Calculate total price for all items in the cart
+  // Function to calculate the total price of the cart
   const calculateTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price, 0);
+  };
+
+  // Define handleEditItem (if you want to enable editing of items)
+  const handleEditItem = (item) => {
+    navigate('/customize', { state: { item } }); // Navigate to Customize page
   };
 
   return (
@@ -80,30 +96,31 @@ function Cart() {
                       <strong>Icing:</strong> {item.icing}<br />
                       <strong>Size:</strong> {item.size} kg<br />
                       <strong>Shape:</strong> {item.shape}<br />
-                      <strong>Celebration Extras:</strong> {item.CelebrationExtras.join(', ')}<br />
+                      <strong>Celebration Extras:</strong> {(item.CelebrationExtras || []).join(', ')}<br /> {/* Safeguard with default empty array */}
                       <strong>Additional Description:</strong> {item.AdditionalDescription}<br />
                       <strong>Custom Message:</strong> {item.customMessage}<br />
-                      <strong>Preferred Colors:</strong> {item.preferredColors.join(', ')}<br />
+                      <strong>Preferred Colors:</strong> {(item.preferredColors || []).join(', ')}<br /> {/* Safeguard with default empty array */}
                       <strong>Price:</strong> Ksh {item.price}
                     </p>
-                    {/* Edit and Remove Buttons */}
-                    <div className="d-flex justify-content-between">
-                      <button
-                        onClick={() => handleEditItem(item)} // Redirect to Customize page
-                        className="btn"
-                        style={{ backgroundColor: '#4CAF50', color: '#fff' }} // Updated button color
-                      >
-                        Edit Item
-                      </button>
-                      <button
-                        onClick={() => removeItemFromCart(item.id)}
-                        className="btn btn-danger"
-                      >
-                        Remove
-                      </button>
-                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Edit and Remove Buttons */}
+              <div className="d-flex justify-content-between">
+                <button
+                  onClick={() => handleEditItem(item)} // Redirect to Customize page
+                  className="btn"
+                  style={{ backgroundColor: '#4CAF50', color: '#fff' }} // Updated button color
+                >
+                  Edit Item
+                </button>
+                <button
+                  onClick={() => removeItemFromCart(item.id)}
+                  className="btn btn-danger"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           ))}
@@ -126,4 +143,3 @@ function Cart() {
 }
 
 export default Cart;
-

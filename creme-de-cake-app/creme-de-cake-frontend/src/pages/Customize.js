@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
 function Customize() {
   const location = useLocation();
   const item = location.state?.item || {}; // Get item from Cart, or set as an empty object
+  const navigate = useNavigate(); // Add useNavigate for navigation
   const { id } = useParams(); // Capture the cake ID from the URL
 
   // State variables either populated with the passed item's details or default values
@@ -53,8 +54,35 @@ function Customize() {
   };
 
   const handleSubmit = () => {
-    alert(`Cake Customized! Icing: ${icing}, Size: ${size}kg, Flavors: ${flavors.join(', ') || customFlavor}, Shape: ${shape}, Decorations: ${decorations.join(', ')}, Colors: ${colors.join(', ')}, Message: ${message}, Description: ${description}`);
+  // Collect all cake customization details
+  const customCake = {
+    icing,
+    size,
+    flavors: flavors.length > 0 ? flavors : [customFlavor], // Use custom flavor if no flavors selected
+    decorations,
+    shape,
+    message,
+    image,
+    description,
+    colors,
   };
+
+  // Display an alert with the customization summary
+  alert(`
+    Cake Customized!
+    Icing: ${icing}
+    Size: ${size}kg
+    Flavors: ${customCake.flavors.join(', ')}
+    Shape: ${shape}
+    Decorations: ${decorations.join(', ')}
+    Colors: ${colors.join(', ')}
+    Message: ${message}
+    Description: ${description}
+  `);
+
+  // Navigate to Cart page and pass the customized cake as state
+  navigate('/cart', { state: { customCake } });
+};
 
   return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>

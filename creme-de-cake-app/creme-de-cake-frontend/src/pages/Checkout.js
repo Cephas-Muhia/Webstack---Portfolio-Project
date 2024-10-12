@@ -224,31 +224,45 @@ function Checkout() {
             </div>
           </div>
 
-          {/* Total Price and Order Confirmation */}
+            {/* Total Price and Order Confirmation */}
         <div className="d-flex justify-content-between align-items-center">
-        <h4 style={{ color: '#3e2c41' }}>Total: Ksh {calculateTotalPrice()}</h4>
-        <button className="btn btn-primary" onClick={handleOrderConfirmation} style={{ backgroundColor: '#3e2c41' }}>
-           Finalize and Order
-        </button>
-        </div>
-        </>
-        ) : (
-        <div className="text-center mt-5">
-        <h2 style={{ color: '#3e2c41' }}>Order Confirmed!</h2>
-        <p style={{ color: '#3e2c41', fontSize: '18px' }}>
-        Your order is being processed. You'll receive an email confirmation shortly!
-         </p>
+     <h4 style={{ color: '#3e2c41', fontWeight: 'bold' }}>Total: Ksh {calculateTotalPrice()}</h4>
+     <button
+    className="btn btn-primary"
+    onClick={handleOrderConfirmation}
+    style={{ backgroundColor: '#3e2c41', borderColor: '#4CAF50' }}>
+    Finalize Your Sweet Order
+  </button>
+</div>
+    ) : (
+      <div className="text-center mt-5">
+    <h2 style={{ color: '#3e2c41', fontSize: '24px', fontWeight: 'bold' }}>🎉 Your Order is Confirmed! 🎉</h2>
+      <p style={{ color: '#3e2c41', fontSize: '18px', marginBottom: '20px' }}>
+       Thank you for choosing us! <br />
+      </p>
+       <p style={{ color: '#3e2c41', fontSize: '16px', fontStyle: 'italic' }}>
+      Your order is being processed, and you'll receive an email confirmation shortly!
+    </p>
+    <p style={{ color: '#3e2c41', fontSize: '16px' }}>
+      <strong>
+        Haven’t updated your profile yet? Tap the button to register and unlock personalized cakes, quicker checkouts, and exclusive treats just for you! 🍰✨
+      </strong>
+    </p>
+    <Link
+      to="/profile"
+      className="btn"
+      style={{ backgroundColor: '#4CAF50', color: '#fff', margin: '20px 0' }}>
+      Create Your Profile
+    </Link>
     <img
       src="/images/logo.png"
       alt="Company Logo"
       style={{ width: '150px', margin: '20px 0' }} // Adjust the width and margin as needed
     />
-   </div>
-  )}
- </div>
-);
-}
+  </div>
+)}
+ 
+      
+
 
 export default Checkout;
-
-
