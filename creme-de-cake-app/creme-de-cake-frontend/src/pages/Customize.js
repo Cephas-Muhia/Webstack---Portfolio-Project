@@ -20,10 +20,35 @@ function Customize() {
   const [description, setDescription] = useState('');
   const [colors, setColors] = useState([]);
 
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Update hasChanges when any state changes
+  useEffect(() => {
+    setHasChanges(
+      icing || size !== 1 || flavors.length > 0 || customFlavor || decorations.length > 0 ||
+      shape || message || image || description || colors.length > 0
+    );
+  }, [icing, size, flavors, customFlavor, decorations, shape, message, image, description, colors]);
+
+  // Reset functionality
+  const handleReset = () => {
+    setIcing('');
+    setSize(1);
+    setFlavors([]);
+    setCustomFlavor('');
+    setDecorations([]);
+    setShape('');
+    setMessage('');
+    setImage(null);
+    setDescription('');
+    setColors([]);
+    setHasChanges(false);
+  };
+
   // Event handler functions
   const handleIcingChange = (event) => setIcing(event.target.value);
   const handleSizeChange = (event) => setSize(event.target.value);
-  
+
   const handleFlavorChange = (event) => {
     const value = event.target.value;
     setFlavors((prev) => {
@@ -34,7 +59,7 @@ function Customize() {
   };
 
   const handleCustomFlavorChange = (event) => setCustomFlavor(event.target.value);
-  
+
   const handleDecorationChange = (event) => {
     const value = event.target.value;
     setDecorations((prev) =>
@@ -54,35 +79,37 @@ function Customize() {
   };
 
   const handleSubmit = () => {
-  // Collect all cake customization details
-  const customCake = {
-    icing,
-    size,
-    flavors: flavors.length > 0 ? flavors : [customFlavor], // Use custom flavor if no flavors selected
-    decorations,
-    shape,
-    message,
-    image,
-    description,
-    colors,
+    if (!hasChanges) return; // Prevent submission if no changes were made
+
+    // Collect all cake customization details
+    const customCake = {
+      icing,
+      size,
+      flavors: flavors.length > 0 ? flavors : [customFlavor], // Use custom flavor if no flavors selected
+      decorations,
+      shape,
+      message,
+      image,
+      description,
+      colors,
+    };
+
+    // Display an alert with the customization summary
+    alert(`
+      Cake Customized!
+      Icing: ${icing}
+      Size: ${size}kg
+      Flavors: ${customCake.flavors.join(', ')}
+      Shape: ${shape}
+      Decorations: ${decorations.join(', ')}
+      Colors: ${colors.join(', ')}
+      Message: ${message}
+      Description: ${description}
+    `);
+
+    // Navigate to Cart page and pass the customized cake as state
+    navigate('/cart', { state: { customCake } });
   };
-
-  // Display an alert with the customization summary
-  alert(`
-    Cake Customized!
-    Icing: ${icing}
-    Size: ${size}kg
-    Flavors: ${customCake.flavors.join(', ')}
-    Shape: ${shape}
-    Decorations: ${decorations.join(', ')}
-    Colors: ${colors.join(', ')}
-    Message: ${message}
-    Description: ${description}
-  `);
-
-  // Navigate to Cart page and pass the customized cake as state
-  navigate('/cart', { state: { customCake } });
-};
 
   return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>
@@ -157,7 +184,7 @@ function Customize() {
         </select>
       </div>
 
-      {/* Decoration Selection */}
+            {/* Decoration Selection */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Celebration Extras</label>
         <div className="d-flex flex-wrap justify-content-between">
@@ -247,11 +274,28 @@ function Customize() {
         />
       </div>
 
-      {/* Submit Button */}
-      <button className="btn btn-primary w-100" onClick={handleSubmit} style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}>Submit Custom Cake</button>
-    </div>
-  );
-}
+         {/* Reset and Submit Buttons */}
+		<div className="button-group">
+  		  <button
+    		type="button"
+    			className="reset-button"
+    			onClick={handleReset}
+    			 style={{ backgroundColor: '#ffcccb', borderColor: '#3e2c41' }}
+  					>
+    			Reset
+  			   </button>
+  			<button
+    	  className="btn btn-primary w-100"
+    	onClick={handleSubmit}
+    	style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
+    	disabled={isSubmitDisabled}
+  		>
+       Submit Custom Cake
+      </button>
+     </div>
+    );
+  }
 
 export default Customize;
-
+           
+           
