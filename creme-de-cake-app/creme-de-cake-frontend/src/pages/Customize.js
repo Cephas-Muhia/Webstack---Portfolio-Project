@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 function Customize() {
+  const location = useLocation();
+  const item = location.state?.item || {}; // Get item from Cart, or set as an empty object
   const { id } = useParams(); // Capture the cake ID from the URL
 
-  // State variables
+  // State variables either populated with the passed item's details or default values
   const [icing, setIcing] = useState('');
   const [size, setSize] = useState(1);
   const [flavors, setFlavors] = useState([]);

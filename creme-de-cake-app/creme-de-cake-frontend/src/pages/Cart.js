@@ -5,7 +5,7 @@ import '../styles.css';
 function Cart() {
   const navigate = useNavigate(); // Initialize navigate for programmatic navigation
 
-  // Sample cart items (this should ideally come from your state or a context)
+  // Sample cart items (this ideally come from state or a context)
   const initialCartItems = [
     {
       id: 1,
@@ -43,9 +43,9 @@ function Cart() {
   };
 
   // Function to handle editing (redirect to Customize page)
+  // pass the item details as state or in the URL (depending on how you handle editing) 
   const handleEditItem = (item) => {
-    // You can pass the item details as state or in the URL (depending on how you handle editing)
-    navigate('/customize', { state: { item } });
+    navigate('/customize', { state: { item } }); // Pass item details to Customize page
   };
 
   // Calculate total price for all items in the cart
