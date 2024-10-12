@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles.css'; // Assuming the same styles apply here
 
 function Checkout() {
@@ -224,45 +225,48 @@ function Checkout() {
             </div>
           </div>
 
-            {/* Total Price and Order Confirmation */}
-        <div className="d-flex justify-content-between align-items-center">
-     <h4 style={{ color: '#3e2c41', fontWeight: 'bold' }}>Total: Ksh {calculateTotalPrice()}</h4>
-     <button
-    className="btn btn-primary"
-    onClick={handleOrderConfirmation}
-    style={{ backgroundColor: '#3e2c41', borderColor: '#4CAF50' }}>
-    Finalize Your Sweet Order
-  </button>
-</div>
-    ) : (
-      <div className="text-center mt-5">
-    <h2 style={{ color: '#3e2c41', fontSize: '24px', fontWeight: 'bold' }}>🎉 Your Order is Confirmed! 🎉</h2>
-      <p style={{ color: '#3e2c41', fontSize: '18px', marginBottom: '20px' }}>
-       Thank you for choosing us! <br />
-      </p>
-       <p style={{ color: '#3e2c41', fontSize: '16px', fontStyle: 'italic' }}>
-      Your order is being processed, and you'll receive an email confirmation shortly!
-    </p>
-    <p style={{ color: '#3e2c41', fontSize: '16px' }}>
-      <strong>
-        Haven’t updated your profile yet? Tap the button to register and unlock personalized cakes, quicker checkouts, and exclusive treats just for you! 🍰✨
-      </strong>
-    </p>
-    <Link
-      to="/profile"
-      className="btn"
-      style={{ backgroundColor: '#4CAF50', color: '#fff', margin: '20px 0' }}>
-      Create Your Profile
-    </Link>
-    <img
-      src="/images/logo.png"
-      alt="Company Logo"
-      style={{ width: '150px', margin: '20px 0' }} // Adjust the width and margin as needed
-    />
-  </div>
-)}
- 
-      
+                    {/* Total Price and Order Confirmation */}
+          <div className="d-flex justify-content-between align-items-center">
+            <h4 style={{ color: '#3e2c41', fontWeight: 'bold' }}>Total: Ksh {calculateTotalPrice()}</h4>
+            <button
+              className="btn btn-primary"
+              onClick={handleOrderConfirmation}
+              style={{ backgroundColor: '#3e2c41', borderColor: '#4CAF50' }}
+            >
+              Confirm Order
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="text-center">
+          <h1 style={{ color: '#3e2c41' }}>🎉 Order Confirmed! 🎉</h1>
+          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
+            Thank you for your purchase! You will receive email confirmation shortly!
+          </p>
+          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
+            Delivery/Pickup Date: {new Date(deliveryDate).toLocaleString()}
+          </p>
+          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
+            Order Date: {new Date(orderDate).toLocaleString()}
+          </p>
 
+          {/* Ask to register profile */}
+          <p style={{ color: '#4CAF50', fontSize: '22px', marginTop: '20px' }}>
+            Want to register your profile for faster future orders? Click below to complete your profile!
+          </p>
+          <Link to="/profile" className="btn btn-primary" style={{ backgroundColor: '#00BFFF', borderColor: '#00BFFF' }}>
+            Complete Your Profile
+          </Link>
+
+          {/* Company Logo */}
+          <div className="mt-4" style={{ marginTop: '200px' }}>
+            <img src="/images/logo.png" alt="Company Logo" className="img-fluid" style={{ maxWidth: '200px' }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Checkout;
+
