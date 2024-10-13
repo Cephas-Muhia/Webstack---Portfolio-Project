@@ -7,6 +7,7 @@ const User = require('../models/User');
 const sendMail = require('../services/mailService'); // Import the sendMail function
 const router = express.Router();
 const dotenv = require('dotenv');
+const upload = require('../services/upload');
 
 dotenv.config();
 
@@ -61,10 +62,38 @@ router.post('/login', async (req, res) => {
     }
 });
 
+//--Profile Picture uploader.
+router.post('/register', upload, async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Create user
+        const user = new User({
+            name,
+            email,
+            password,
+            profilePicture: req.file ? req.file.path : null // Save path of uploaded picture
+        });
+
+        await user.save();
+
+        // Send welcome email
+        sendMail(user.email, 'Welcome to Crème de Cake', 'Thank you for registering!');
+
+        // Here you might want to generate a token
+
+        res.status(201).json({ message: 'User registered successfully!' });
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).json({ error: 'Registration failed' });
+    }
+});
+
 // Protected route (for demonstration)
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
     res.json({ user: req.user });
 });
+
 
 module.exports = router;
 

@@ -1,14 +1,19 @@
 const express = require('express');
 const passport = require('passport');
+const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const cakeRoutes = require('./routes/cakeRoutes'); // Import your cake routes
 require('./config/passport')(passport); // Passport config
 
 const app = express();
 
+// Serve static files
+app.use('/uploads', express.static('uploads'));
+
 // Middleware
 app.use(express.json());
 app.use(passport.initialize());
+app.use(cors()); // Enable CORS for all routes
 
 // Routes
 app.use('/api/auth', authRoutes);

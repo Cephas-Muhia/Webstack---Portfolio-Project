@@ -3,36 +3,37 @@ const router = express.Router();
 const Cake = require('../models/Cake');
 const Customization = require('../models/Customization');
 const Order = require('../models/Order');
+const User = require('../models/User');
 
 // -------------------- STATIC ROUTES -------------------- //
 
 // Home - Sweet Start
-router.get('/', (req, res) => {
+router.get('/Home.js', (req, res) => {
   res.send('Welcome to Sweet Start');
 });
 
 // Catalogue - Cake Wonderland
-router.get('/catalogue', (req, res) => {
+router.get('/Catalogue.js', (req, res) => {
   res.send('Explore Cake Wonderland');
 });
 
 // Cake Customizer
-router.get('/customize', (req, res) => {
+router.get('/Customize.js', (req, res) => {
   res.send('Customize your cake');
 });
 
 // Cart - Treat Basket
-router.get('/cart', (req, res) => {
+router.get('/Cart.js', (req, res) => {
   res.send('Your Treat Basket');
 });
 
 // Checkout - Checkout Delight
-router.get('/checkout', (req, res) => {
-  res.send('Proceed to Checkout Delight');
+router.get('/Checkout.js', (req, res) => {
+  res.send('Wellcome to Checkout Delight');
 });
 
 // My Profile
-router.get('/profile', (req, res) => {
+router.get('/Profile.js', (req, res) => {
   res.send('Your Profile');
 });
 
