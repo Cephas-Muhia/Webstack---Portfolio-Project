@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Col, Row, Container } from 'react-bootstrap';
-import { GoogleLogin } from 'react-google-login';
+import { GoogleLogin } from '@react-oauth/google'; // Updated import
 import '../styles.css'; // additional styling if needed
 
 const Profile = () => {
@@ -37,12 +37,14 @@ const Profile = () => {
     }));
   };
 
-  const handleGoogleLoginSuccess = (response) => {
+  const handleGoogleLoginSuccess = (credentialResponse) => {
+    const userProfile = JSON.parse(atob(credentialResponse.credential.split('.')[1])); // Decode JWT to get user profile
+
     setProfileInfo({
-      name: response.profileObj.name,
-      email: response.profileObj.email,
+      name: userProfile.name,
+      email: userProfile.email,
       phoneNumber: '',
-      profilePhoto: response.profileObj.imageUrl,
+      profilePhoto: userProfile.picture,
       birthday: '',
       address: '',
       preferredCake: '',
@@ -71,19 +73,16 @@ const Profile = () => {
           />
           {isEditing && (
             <Form.Group controlId="Registration" className="text-center">
-              <Form.Group controlId="Registration" className="text-center">
-  <Form.Label
-    style={{
-      fontFamily: 'Poppins, sans-serif',
-      color: '#3e2c41',
-      fontWeight: 'bold', // Bold font
-      fontSize: '1.2rem', // Optional: Increase font size for emphasis
-    }}
-  >
-    "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more! It’s quick, easy, and tailored just for you – register now and make your cake experience even sweeter!" 🎂✨
-  </Form.Label>
-</Form.Group>
-
+              <Form.Label
+                style={{
+                  fontFamily: 'Poppins, sans-serif',
+                  color: '#3e2c41',
+                  fontWeight: 'bold', // Bold font
+                  fontSize: '1.2rem', // Optional: Increase font size for emphasis
+                }}
+              >
+                "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more! It’s quick, easy, and tailored just for you – register now and make your cake experience even sweeter!" 🎂✨
+              </Form.Label>
               <Form.Control type="file" onChange={handlePhotoUpload} style={{ display: 'block', margin: 'auto' }} />
             </Form.Group>
           )}
@@ -218,13 +217,24 @@ const Profile = () => {
               />
             ) : (
               <p className="form-control-plaintext" style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem', color: '#3e2c41' }}>
-                {profileInfo.preferredCake || <em style={{ fontSize: '1rem' }}>Please register to update your cake preferences.</em>}
+                {profileInfo.preferredCake || <em style={{ fontSize: '1rem' }}>Please register to update your preferred cake types.</em>}
               </p>
             )}
           </Col>
         </Form.Group>
 
-        {/* Password and Confirm Password Fields */}
+        {/* Google Login Button */}
+        <Form.Group as={Row} className="mb-3" controlId="formGoogleLogin">
+          <Col sm="10" className="offset-sm-2">
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onFailure={handleGoogleLoginFailure}
+              style={{ width: '100%' }} // Optional: Adjust width as needed
+            />
+          </Col>
+        </Form.Group>
+
+        {/* Password and Confirm Password Fields (only if editing) */}
         {isEditing && (
           <>
             <Form.Group as={Row} className="mb-3" controlId="formPlaintextPassword">
@@ -238,7 +248,6 @@ const Profile = () => {
                   value={profileInfo.password}
                   onChange={handleChange}
                   style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem' }}
-                  placeholder="Enter a new password"
                 />
               </Col>
             </Form.Group>
@@ -254,35 +263,23 @@ const Profile = () => {
                   value={profileInfo.confirmPassword}
                   onChange={handleChange}
                   style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem' }}
-                  placeholder="Confirm your new password"
                 />
               </Col>
             </Form.Group>
           </>
         )}
 
-        {/* Google Login */}
-        <Row className="mb-3 text-center">
-          <Col>
-            <GoogleLogin
-              clientId="YOUR_GOOGLE_CLIENT_ID"
-              buttonText="Login with Google"
-              onSuccess={handleGoogleLoginSuccess}
-              onFailure={handleGoogleLoginFailure}
-              cookiePolicy={'single_host_origin'}
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            />
-          </Col>
-        </Row>
-
-        {/* Edit Button */}
-        <Row className="text-center">
-          <Col>
-            <Button onClick={handleEditToggle} style={{ backgroundColor: '#3e2c41', color: 'white', fontFamily: 'Poppins, sans-serif', fontSize: '1.1rem' }}>
+        {/* Buttons for editing and saving */}
+        <Form.Group as={Row} className="mb-3" controlId="formButtons">
+          <Col sm="10" className="offset-sm-2">
+            <Button variant="primary" onClick={handleEditToggle} style={{ marginRight: '1rem' }}>
               {isEditing ? 'Save Changes' : 'Edit Profile'}
             </Button>
+            <Button variant="secondary" onClick={() => setProfileInfo({ ...profileInfo, ...{ name: '', email: '', phoneNumber: '', birthday: '', address: '', preferredCake: '', password: '', confirmPassword: '' } })}>
+              Cancel
+            </Button>
           </Col>
-        </Row>
+        </Form.Group>
       </Form>
     </Container>
   );

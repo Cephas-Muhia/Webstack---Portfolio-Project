@@ -42,7 +42,7 @@ function Catalogue() {
     >
       <div className="container text-center">
         {/* Title and description */}
-        <h1 className="display-4 font-weight-bold mb-3">Cake Wonderland</h1>
+        <h1 className="display-4 font-weight-bold mb-3">Flavour Wonderland</h1>
         <p className="lead mb-4">
           Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
         </p>
@@ -60,7 +60,7 @@ function Catalogue() {
                 style={{ borderRadius: '10px 10px 0 0' }}
               />
               <div className="card-body">
-                <h5 className="card-title">{cake.name}</h5>
+                <h5 className="card-title">{cake.flavour}</h5>
                 <p className="card-text">{cake.description}</p>
                 <Link
                   to={`/customize/${cake.id}`}

@@ -8,34 +8,34 @@ const User = require('../models/User');
 // -------------------- STATIC ROUTES -------------------- //
 
 // Home - Sweet Start
-router.get('/Home.js', (req, res) => {
-  res.send('Welcome to Sweet Start');
-});
+//router.get('/Home.js', (req, res) => {
+  //res.send('Welcome to Sweet Start');
+//});
 
 // Catalogue - Cake Wonderland
-router.get('/Catalogue.js', (req, res) => {
-  res.send('Explore Cake Wonderland');
-});
+//router.get('/Catalogue.js', (req, res) => {
+  //res.send('Explore Cake Wonderland');
+//});
 
 // Cake Customizer
-router.get('/Customize.js', (req, res) => {
-  res.send('Customize your cake');
-});
+//router.get('/Customize.js', (req, res) => {
+  //res.send('Customize your cake');
+//});
 
 // Cart - Treat Basket
-router.get('/Cart.js', (req, res) => {
-  res.send('Your Treat Basket');
-});
+//router.get('/Cart.js', (req, res) => {
+  //res.send('Your Treat Basket');
+//});
 
 // Checkout - Checkout Delight
-router.get('/Checkout.js', (req, res) => {
-  res.send('Wellcome to Checkout Delight');
-});
+//router.get('/Checkout.js', (req, res) => {
+  //res.send('Wellcome to Checkout Delight');
+//});
 
 // My Profile
-router.get('/Profile.js', (req, res) => {
-  res.send('Your Profile');
-});
+//router.get('/Profile.js', (req, res) => {
+  //res.send('Your Profile');
+//});
 
  // -------------------- CRUD for User -------------------- //
 

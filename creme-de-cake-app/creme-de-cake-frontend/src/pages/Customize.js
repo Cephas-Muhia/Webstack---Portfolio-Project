@@ -241,6 +241,9 @@ function Customize() {
           <option value="Blue">Blue</option>
           <option value="Purple">Purple</option>
           <option value="Yellow">Yellow</option>
+          <option value="Black">Black</option>
+          <option value="Green">Green</option>
+          <option value="Orange">Orange</option>
         </select>
       </div>
 
@@ -284,7 +287,7 @@ function Customize() {
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
-          style={{ marginLeft: '1rem', backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
+          style={{ marginRight: '1rem', backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
           disabled={!hasChanges}
         >
           Submit Cake Customization
