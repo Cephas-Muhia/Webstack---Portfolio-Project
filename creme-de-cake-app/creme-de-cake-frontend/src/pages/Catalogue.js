@@ -1,9 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Use useNavigate for navigation
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios'; // Import Axios
 
 function Catalogue() {
-  const cakes = [
+  const navigate = useNavigate(); // Initialize navigation hook
+
+const cakes = [
     { id: 1, name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg' },
     { id: 2, name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg' },
     { id: 3, name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg' },
@@ -30,6 +33,32 @@ function Catalogue() {
     { id: 24, name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
+  const handleCustomizeClick = async (cakeId, flavor) => {
+    try {
+      // Create a new order in the backend using Axios
+      const response = await axios.post('http://localhost:5000/api/orders', {
+        flavor, // Send the flavor to the backend
+        user: 'user_id', // Replace this with the actual user's ID from authentication
+      });
+
+      const orderData = response.data;
+
+      // Prompt to save the flavor as preferredCakeFlavors
+      const savePreferred = window.confirm(`Do you want to save ${flavor} as a preferred flavor?`);
+      if (savePreferred) {
+        await axios.post('http://localhost:5000/api/users/preferred-flavors', {
+          flavor,
+          user: 'user_id', // Replace with actual user ID
+        });
+      }
+
+      // Redirect to the Customize page with the newly created order ID
+      navigate(`/customize/${orderData.order._id}`);
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
+
   return (
     <div
       className="d-flex flex-column justify-content-center align-items-center"
@@ -54,21 +83,21 @@ function Catalogue() {
           <div className="col-md-4 mb-4" key={cake.id}>
             <div className="card shadow" style={{ borderRadius: '10px' }}>
               <img
-                src={cake.imgUrl} // Directly use the relative path to public folder
+                src={cake.imgUrl}
                 className="card-img-top"
                 alt={cake.name}
                 style={{ borderRadius: '10px 10px 0 0' }}
               />
               <div className="card-body">
-                <h5 className="card-title">{cake.flavour}</h5>
+                <h5 className="card-title">{cake.name}</h5>
                 <p className="card-text">{cake.description}</p>
-                <Link
-                  to={`/customize/${cake.id}`}
+                <button
                   className="btn btn-lg"
                   style={{ backgroundColor: '#3e2c41', color: 'white' }}
+                  onClick={() => handleCustomizeClick(cake.id, cake.name)} // Pass cake details
                 >
                   Customize
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -79,4 +108,5 @@ function Catalogue() {
 }
 
 export default Catalogue;
+
 
