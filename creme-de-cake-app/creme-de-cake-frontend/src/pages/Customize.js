@@ -21,6 +21,9 @@ function Customize() {
     designImage: ''
   });
 
+  const [flavors, setFlavors] = useState([]); // To handle multiple flavors
+  const [colors, setColors] = useState([]); // To handle multiple colors
+
   // Handle input change for form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +31,36 @@ function Customize() {
       ...formData,
       [name]: value,
     });
+  };
+
+  // Handle flavor selection with a limit of 3
+  const handleFlavorChange = (e) => {
+    const options = Array.from(e.target.selectedOptions, option => option.value);
+    if (options.length <= 3) {
+      setFlavors(options);
+      setFormData({ ...formData, flavor: options });
+    }
+  };
+
+  // Handle custom flavor input
+  const handleCustomFlavorChange = (e) => {
+    setFormData({ ...formData, customFlavor: e.target.value });
+  };
+
+  // Handle cake color selection
+  const handleColorChange = (e) => {
+    const options = Array.from(e.target.selectedOptions, option => option.value);
+    setColors(options);
+    setFormData({ ...formData, preferredColors: options });
+  };
+
+  // Handle decoration selection
+  const handleDecorationChange = (e) => {
+    const { value, checked } = e.target;
+    const updatedDecorations = checked
+      ? [...formData.decorations, value]
+      : formData.decorations.filter((decoration) => decoration !== value);
+    setFormData({ ...formData, decorations: updatedDecorations });
   };
 
   // Handle file upload for the cake design image
@@ -79,13 +112,15 @@ function Customize() {
       preferredColors: [],
       designImage: ''
     });
+    setFlavors([]);
+    setColors([]);
   };
 
   return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '2rem' }}>Customize Your Cake</h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
-        Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more.
+        Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
       </p>
 
       {/* Icing Type */}
@@ -120,26 +155,23 @@ function Customize() {
       </div>
 
       {/* Cake Flavor Selection */}
-      
-        <div className="mb-4">
+      <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Select Up to 3 Cake Flavors</label>
         <select multiple className="form-select" value={flavors} onChange={handleFlavorChange}>
           <option value="Vanilla">Vanilla</option>
           <option value="Strawberry">Strawberry</option>
           <option value="Marble">Marble</option>
           <option value="Red Velvet">Red Velvet</option>
-          <option value="Royal Velvet">Royal Velvet</option>
           <option value="Black Forest">Black Forest</option>
           <option value="White Forest">White Forest</option>
           <option value="Chocolate">Chocolate</option>
-          <option value="Bubble Gum">Bubble Gum</option>
           <option value="Lemon">Lemon</option>
         </select>
         <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple flavors.</small>
         {flavors.length >= 3 && (
-          <p className="text-warning" style={{ color: 'red' }}>You can only select up to 3 flavors.</p>
+          <p className="text-warning">You can only select up to 3 flavors.</p>
         )}
-        <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
+         <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
         <input
           type="text"
           className="form-control mt-2"
@@ -149,7 +181,6 @@ function Customize() {
           style={{ borderColor: '#ff6347', color: '#ff6347' }}
         />
       </div>
-
 
       {/* Cake Shape */}
       <div className="mb-4">
@@ -167,62 +198,31 @@ function Customize() {
         </select>
       </div>
 
-            {/* Decoration Selection */}
+      {/* Decoration Selection */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Choose Decorations</label>
         <div className="d-flex flex-wrap justify-content-between">
-          <div className="form-check">
-            <input
-              type="checkbox"
-              value="Sprinkles"
-              onChange={handleDecorationChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" style={{ color: '#3e2c41' }}>Sprinkles</label>
-          </div>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              value="Flowers"
-              onChange={handleDecorationChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" style={{ color: '#3e2c41' }}>Flowers</label>
-          </div>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              value="Candles"
-              onChange={handleDecorationChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" style={{ color: '#3e2c41' }}>Candles</label>
-          </div>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              value="Edible Glitter"
-              onChange={handleDecorationChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" style={{ color: '#3e2c41' }}>Edible Glitter</label>
-          </div>
+          {['Sprinkles', 'Flowers', 'Candles', 'Edible Glitter'].map((decoration) => (
+            <div className="form-check" key={decoration}>
+              <input
+                type="checkbox"
+                value={decoration}
+                onChange={handleDecorationChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>{decoration}</label>
+            </div>
+          ))}
         </div>
       </div>
 
-            {/* Cake Color Selection */}
+      {/* Cake Color Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Select your preffered Cake Colors</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Select Your Preferred Cake Colors</label>
         <select multiple className="form-select" value={colors} onChange={handleColorChange}>
-          <option value="Red">Red</option>
-          <option value="Blue">Blue</option>
-          <option value="Green">Green</option>
-          <option value="Yellow">Yellow</option>
-          <option value="Pink">Pink</option>
-          <option value="Purple">Purple</option>
-          <option value="Orange">Orange</option>
-          <option value="Black">Black</option>
-          <option value="White">White</option>
+          {['Red', 'Blue', 'Green', 'Yellow', 'Pink', 'Purple', 'Orange', 'Black', 'White'].map((color) => (
+            <option key={color} value={color}>{color}</option>
+          ))}
         </select>
         <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
       </div>
@@ -230,16 +230,16 @@ function Customize() {
       {/* Message */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>What Message Would You Like to See on Your Cake? 📝</label>
-        <input
-          type="text"
-          className="form-control"
-          name="message"
-          value={formData.message}
+          <input
+           type="text"
+            className="form-control"
+           name="message"
+           value={formData.message}
           onChange={handleChange}
           placeholder="Enter your cake message..."
         />
       </div>
-
+       
       {/* Image Upload */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Upload your cake of how you envision your cake to look like</label>
