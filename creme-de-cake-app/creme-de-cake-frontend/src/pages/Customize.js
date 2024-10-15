@@ -8,7 +8,7 @@ function Customize() {
 
   // Form state to handle customization inputs
   const [formData, setFormData] = useState({
-    flavor: '',
+    flavor: [],
     customFlavor: '',
     sizeInKgs: 1, // Default to 1 kg
     decorations: [],
@@ -100,7 +100,7 @@ function Customize() {
   // Reset the form fields
   const handleReset = () => {
     setFormData({
-      flavor: '',
+      flavor: [],
       customFlavor: '',
       sizeInKgs: 1,
       decorations: [],
@@ -171,12 +171,12 @@ function Customize() {
         {flavors.length >= 3 && (
           <p className="text-warning">You can only select up to 3 flavors.</p>
         )}
-         <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
+        <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
         <input
           type="text"
           className="form-control mt-2"
           placeholder="Enter custom flavor"
-          value={customFlavor}
+          value={formData.customFlavor}
           onChange={handleCustomFlavorChange}
           style={{ borderColor: '#ff6347', color: '#ff6347' }}
         />
@@ -194,13 +194,13 @@ function Customize() {
           <option value="Round">Round</option>
           <option value="Square">Square</option>
           <option value="Heart">Heart</option>
-          <option value="Stuck-Up">Stuck-Up</option>
+          <option value="Stacked">Stacked</option>
         </select>
       </div>
 
       {/* Decoration Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Choose Decorations</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Choose Celebration Extra's</label>
         <div className="d-flex flex-wrap justify-content-between">
           {['Sprinkles', 'Flowers', 'Candles', 'Edible Glitter'].map((decoration) => (
             <div className="form-check" key={decoration}>
@@ -227,41 +227,47 @@ function Customize() {
         <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
       </div>
 
-      {/* Message */}
+      {/* Custom Cake Message */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>What Message Would You Like to See on Your Cake? 📝</label>
-          <input
-           type="text"
-            className="form-control"
-           name="message"
-           value={formData.message}
+        <input
+          type="text"
+          className="form-control"
+          name="message"
+          value={formData.message}
           onChange={handleChange}
-          placeholder="Enter your cake message..."
+          placeholder="E.g., 'Happy Birthday!', 'I love you Sweeriee', 'Congratulation'"
         />
       </div>
-       
-      {/* Image Upload */}
-      <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Upload your cake of how you envision your cake to look like</label>
-        <input type="file" className="form-control" onChange={handleFileUpload} />
-      </div>
 
-      {/* Additional Instructions */}
+      {/* Additional Description */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Provide additional details on how you envision your cake to be crafted.</label>
         <textarea
           className="form-control"
-          rows="4"
           name="AdditionalDescription"
           value={formData.AdditionalDescription}
           onChange={handleChange}
-          placeholder="Describe your dream cake!"
+          placeholder="Provide extra details for your cake..."
         />
       </div>
 
-      {/* Submit and Reset Buttons */}
-      <button className="btn btn-primary w-100 mb-2" onClick={handleSubmit} style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}>Submit Custom Cake</button>
-      <button className="btn btn-secondary w-100" onClick={handleReset}>Reset Customization</button>
+      {/* File Upload for Cake Design */}
+      <div className="mb-4">
+        <label className="form-label" style={{ color: '#3e2c41' }}>Upload a Picture of how you envision your cake to look like</label>
+        <input
+          type="file"
+          className="form-control"
+          accept="image/*"
+          onChange={handleFileUpload}
+          placeholder="upload an image of your cake design here!"
+        />
+      </div>
+
+      <div className="d-flex justify-content-between mt-5">
+        <button className="btn btn-secondary" onClick={handleReset}>Reset Customization</button>
+        <button className="btn btn-success" onClick={handleSubmit}>Submit Customized Cake</button>
+      </div>
     </div>
   );
 }
