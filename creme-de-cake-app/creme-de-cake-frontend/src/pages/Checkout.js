@@ -1,37 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import axios from 'axios';
 import '../styles.css'; // Assuming the same styles apply here
 
 function Checkout() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Chocolate Cake',
-      icing: 'Fresh Cream',
-      size: 2,
-      shape: 'Round',
-      celebrationExtras: ['Sprinkles', 'Candles'],
-      additionalDescription: 'Rich chocolate with layers of fudge.',
-      image: '/images/freshcream.jpg',
-      customMessage: 'Happy Birthday John!',
-      preferredColors: ['Brown', 'Gold'],
-      price: 1500,
-    },
-    {
-      id: 2,
-      name: 'Vanilla Cake',
-      icing: 'Soft Icing',
-      size: 1.5,
-      shape: 'Square',
-      celebrationExtras: ['Floral Touch'],
-      additionalDescription: 'A classic vanilla cake with a soft touch.',
-      image: '/images/softicing.jpg',
-      customMessage: 'Happy Anniversary!',
-      preferredColors: ['White', 'Pink'],
-      price: 1200,
-    },
-  ]);
-
+  const { orderId } = useParams(); // Assuming orderId is passed through the URL
+  const [cartItems, setCartItems] = useState([]);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -39,16 +13,54 @@ function Checkout() {
     address: '',
     specialInstructions: '',
   });
-
   const [paymentMethod, setPaymentMethod] = useState('');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [orderDate, setOrderDate] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
 
   useEffect(() => {
-    const currentDate = new Date().toISOString().slice(0, 16); 
+    const currentDate = new Date().toISOString().slice(0, 16);
     setOrderDate(currentDate);
-  }, []);
+    
+    // Fetch cake details from backend
+    const fetchCakeDetails = async () => {
+      try {
+        // Replace this with your backend API URL to fetch order details
+        const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
+        const orderData = response.data;
+
+        // Update cart items with fetched data
+        setCartItems([
+          {
+            id: orderData.cakeId,
+            name: orderData.cakeName,
+            icing: orderData.icing,
+            size: orderData.size,
+            shape: orderData.shape,
+            celebrationExtras: orderData.CelebrationExtras.map(extra => extra.name),
+            additionalDescription: orderData.AdditionalDescription,
+            image: orderData.image,
+            customMessage: orderData.customMessage,
+            preferredColors: orderData.preferredColors,
+            price: await calculateTotalPrice(orderData.cakeId, orderData.size),  // Fetch the price from the backend
+          },
+        ]);
+
+        // Update customer info if needed
+        setCustomerInfo({
+          name: orderData.customerName,
+          email: orderData.customerEmail,
+          phone: orderData.customerPhone,
+          address: orderData.deliveryAddress,
+          specialInstructions: orderData.specialInstructions || '',
+        });
+      } catch (error) {
+        console.error('Error fetching cake details:', error);
+      }
+    };
+
+    fetchCakeDetails();
+  }, [orderId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,8 +74,16 @@ function Checkout() {
     setPaymentMethod(e.target.value);
   };
 
-  const calculateTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.price, 0);
+  const calculateTotalPrice = async (cakeId, numOfKgs) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/cakes/${cakeId}`);
+      const cake = response.data;
+      const totalPrice = cake.basePrice * numOfKgs;  // Assume backend returns base price per kg
+      return totalPrice;
+    } catch (error) {
+      console.error('Error calculating total price:', error);
+      return 0;
+    }
   };
 
   const handleOrderConfirmation = () => {
@@ -121,6 +141,7 @@ function Checkout() {
           <div className="mb-4">
             <h3 style={{ color: '#3e2c41', borderBottom: '2px solid #3e2c41', paddingBottom: '5px' }}>Customer Information</h3>
             <form>
+              {/* Customer info fields */}
               <div className="form-group">
                 <label htmlFor="name" style={{ color: '#3e2c41' }}>Full Name</label>
                 <input
@@ -197,60 +218,37 @@ function Checkout() {
           {/* Payment Section */}
           <div className="mb-4">
             <h3 style={{ color: '#3e2c41', borderBottom: '2px solid #3e2c41', paddingBottom: '5px' }}>Payment Method</h3>
-            <div className="form-check">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="payment"
-                value="Mpesa"
-                checked={paymentMethod === 'Mpesa'}
-                onChange={handlePaymentMethodChange}
-              />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>
-                Mpesa
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="payment"
-                value="Cash on Delivery"
-                checked={paymentMethod === 'Cash on Delivery'}
-                onChange={handlePaymentMethodChange}
-              />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>
-                Cash on Delivery
-              </label>
-            </div>
+            <select
+              className="form-control"
+              value={paymentMethod}
+              onChange={handlePaymentMethodChange}
+              required
+            >
+              <option value="">Select Payment Method</option>
+              <option value="mpesa">M-Pesa</option>
+              <option value="card">Credit/Debit Card</option>
+              <option value="cash">Cash on Delivery</option>
+            </select>
           </div>
 
-                    {/* Total Price and Order Confirmation */}
-          <div className="d-flex justify-content-between align-items-center">
-            <h4 style={{ color: '#3e2c41', fontWeight: 'bold' }}>Total: Ksh {calculateTotalPrice()}</h4>
-            <button
-              className="btn btn-primary"
-              onClick={handleOrderConfirmation}
-              style={{ backgroundColor: '#3e2c41', borderColor: '#4CAF50' }}
-            >
-              Confirm Order
-            </button>
-          </div>
+          {/* Confirm Button */}
+          <button
+            className="btn btn-primary btn-lg"
+            style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
+            onClick={handleOrderConfirmation}
+          >
+            Confirm Order
+          </button>
         </>
       ) : (
         <div className="text-center">
-          <h1 style={{ color: '#3e2c41' }}>🎉 Order Confirmed! 🎉</h1>
-          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
-            Thank you for your purchase! You will receive email confirmation shortly!
-          </p>
-          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
-            Delivery/Pickup Date: {new Date(deliveryDate).toLocaleString()}
-          </p>
-          <p style={{ color: '#3e2c41', fontSize: '18px' }}>
-            Order Date: {new Date(orderDate).toLocaleString()}
-          </p>
-
-          {/* Ask to register profile */}
+          <h2 style={{ color: '#3e2c41' }}>🎉 Order Confirmed! 🎉</h2>
+          <p style={{ color: '#3e2c41' }}>Thank you for choosing Creme de Cake.</p>
+          <p style={{ color: '#3e2c41' }}>You will receive email confirmation shortly!.</p>
+          <Link to="/" className="btn btn-primary btn-lg" style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}>
+            Return to Home
+          </Link>
+                   {/* Ask to register profile */}
           <p style={{ color: '#4CAF50', fontSize: '22px', marginTop: '20px' }}>
             Want to register your profile for faster future orders? Click below to complete your profile!
           </p>
