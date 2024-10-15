@@ -38,6 +38,16 @@ const User = require('../models/User');
 //});
 
  // -------------------- CRUD for User -------------------- //
+//Registering preferred cake flavours from Catalogue.js
+router.post('/preferred-flavors', async (req, res) => {
+  try {
+    const { flavor, user } = req.body;
+    await User.findByIdAndUpdate(user, { $addToSet: { preferredCakeFlavors: flavor } }); // Add if not already present
+    res.status(200).json({ message: 'Flavor added to preferredCakeFlavors' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error saving preferred flavor' });
+  }
+});
 
 // Create a new user (POST)
 router.post('/users', async (req, res) => {
@@ -345,6 +355,24 @@ router.delete('/customizations/:id', async (req, res) => {
 });
 
 // -------------------- CRUD for Orders -------------------- //
+//Intiating order from Catalogue.js
+router.post('/', async (req, res) => {
+  try {
+    const { flavor, user } = req.body;
+
+    // Create a new order
+    const newOrder = new Order({
+      cake: flavor,
+      user: user,
+      status: 'pending', // Example status
+    });
+
+    const savedOrder = await newOrder.save();
+    res.status(201).json({ order: savedOrder });
+  } catch (error) {
+    res.status(500).json({ error: 'Error creating order' });
+  }
+});
 
 // Create a new order (POST)
 router.post('/orders', async (req, res) => {
