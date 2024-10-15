@@ -15,7 +15,10 @@ const orderSchema = new mongoose.Schema({
         enum: ['Square', 'Round', 'Stacked'],
         required: true
     },
-    CelebrationExtras: [{ type: String }],  // Extras like sprinkles, candles, etc.
+    CelebrationExtras: [{ 
+        name: { type: String, enum: ['Sprinkles', 'Flowers', 'Candles', 'Edible Glitter'] },
+        price: { type: Number }
+    }],  // Extras with prices
     AdditionalDescription: { type: String },  // Additional description for the cake
     image: { type: String },  // Image URL or path
     customMessage: { type: String },  // Custom message on the cake
@@ -30,6 +33,29 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,  // Customization details for flexibility
         required: true 
     },
+});
+
+// Add default prices to the available extras
+orderSchema.pre('save', function(next) {
+    if (this.CelebrationExtras && this.CelebrationExtras.length) {
+        this.CelebrationExtras.forEach(extra => {
+            switch(extra.name) {
+                case 'Sprinkles':
+                    extra.price = 300;
+                    break;
+                case 'Flowers':
+                    extra.price = 400;
+                    break;
+                case 'Candles':
+                    extra.price = 250;
+                    break;
+                case 'Edible Glitter':
+                    extra.price = 500;
+                    break;
+            }
+        });
+    }
+    next();
 });
 
 const Order = mongoose.model('Order', orderSchema);

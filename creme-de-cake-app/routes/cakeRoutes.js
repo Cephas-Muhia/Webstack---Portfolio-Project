@@ -172,50 +172,6 @@ router.post('/users/login', async (req, res) => {
 
 // -------------------- CRUD for Cakes -------------------- //
 
-// Create a new cake (POST)
-router.post('/cakes', async (req, res) => {
-  try {
-    const {
-      CakeFlavor,
-      description,
-      basePrice,
-      image,
-      categories,
-      icingOptions,  // List of icing options for the cake
-      availability,  // Availability status (optional)
-      ratings,  // Average ratings (optional)
-      reviews,  // List of reviews (optional)
-      customizable  // Whether the cake is customizable
-    } = req.body;
-
-    // Validate required fields
-    if (!CakeFlavor || !basePrice) {
-      return res.status(400).send({ error: 'Missing required fields: CakeFlavor or basePrice' });
-    }
-
-    // Create a new cake with the provided details
-    const newCake = new Cake({
-      CakeFlavor,
-      description,
-      basePrice,
-      image,
-      categories,
-      icingOptions,  // Optional icing options
-      availability: availability !== undefined ? availability : true,  // Default to true if not provided
-      ratings: ratings || 0,  // Default rating to 0 if not provided
-      reviews: reviews || [],  // Default to an empty array if no reviews are provided
-      customizable
-    });
-
-    await newCake.save();
-    res.status(201).send(newCake);  // Send the created cake back in the response
-  } catch (error) {
-    console.error('Error creating cake:', error);  // Log the error for debugging
-    res.status(500).send({ error: 'Failed to create cake' });  // Respond with an error message
-  }
-});
-
-
 // Get all cakes (GET)
 router.get('/cakes', async (req, res) => {
   try {
@@ -261,56 +217,6 @@ router.delete('/cakes/:id', async (req, res) => {
 
 // -------------------- CRUD for Customizations -------------------- //
 
-// Create a new customization (POST)
-router.post('/customizations', async (req, res) => {
-  try {
-    const {
-      cakeId,
-      flavor,
-      sizeInKgs,
-      decorations,
-      icingType,
-      shape,
-      photo,
-      CelebrationExtras,  // New field for extras like sprinkles or candles
-      message,  // New field for custom cake message
-      AdditionalDescription,  // New field for extra customization instructions
-      preferredColors  // New field for preferred colors of the cake
-    } = req.body;
-
-    // Validate required fields
-    if (!cakeId || !sizeInKgs || !icingType || !shape) {
-      return res.status(400).send({ error: 'Missing required fields: cakeId, sizeInKgs, icingType, or shape' });
-    }
-
-    // Validate sizeInKgs to ensure it's a positive number
-    if (sizeInKgs <= 0) {
-      return res.status(400).send({ error: 'Cake size must be greater than zero' });
-    }
-
-    // Create a new customization with the provided details
-    const newCustomization = new Customization({
-      cakeId,
-      flavor,
-      sizeInKgs,
-      decorations,
-      icingType,
-      shape,
-      photo,
-      CelebrationExtras,  // Optional celebration extras
-      message,  // Optional custom message
-      AdditionalDescription,  // Optional extra customization description
-      preferredColors  // Optional preferred colors for the cake
-    });
-
-    await newCustomization.save();
-    res.status(201).send(newCustomization); // Send the created customization back in the response
-  } catch (error) {
-    console.error('Error creating customization:', error); // Log the error for debugging
-    res.status(500).send({ error: 'Failed to create customization' }); // Respond with an error message
-  }
-});
-
 // Get all customizations (GET)
 router.get('/customizations', async (req, res) => {
   try {
@@ -355,90 +261,7 @@ router.delete('/customizations/:id', async (req, res) => {
 });
 
 // -------------------- CRUD for Orders -------------------- //
-//Intiating order from Catalogue.js
-router.post('/', async (req, res) => {
-  try {
-    const { flavor, user } = req.body;
-
-    // Create a new order
-    const newOrder = new Order({
-      cake: flavor,
-      user: user,
-      status: 'pending', // Example status
-    });
-
-    const savedOrder = await newOrder.save();
-    res.status(201).json({ order: savedOrder });
-  } catch (error) {
-    res.status(500).json({ error: 'Error creating order' });
-  }
-});
-
-// Create a new order (POST)
-router.post('/orders', async (req, res) => {
-  try {
-    const {
-      userId,
-      cakeId,
-      quantity,
-      collectionDate,
-      icing,
-      size,
-      shape,
-      CelebrationExtras,
-      AdditionalDescription,
-      customMessage,
-      preferredColors,
-      price
-    } = req.body;
-
-    // Validate required fields
-    if (!userId || !cakeId || !quantity || !collectionDate || !price) {
-      return res.status(400).send({ error: 'Missing required fields' });
-    }
-
-    // Validate quantity and price
-    if (quantity <= 0 || price <= 0) {
-      return res.status(400).send({ error: 'Quantity and price must be greater than zero' });
-    }
-
-    // Calculate total price based on price per cake and quantity
-    const totalPrice = price * quantity;
-
-    // Create a new order using the provided details
-    const newOrder = new Order({
-      userId,
-      cakeId,
-      quantity,
-      totalPrice,
-      icing,
-      size,
-      shape,
-      CelebrationExtras,
-      AdditionalDescription,
-      customMessage,
-      preferredColors,
-      collectionDate,
-      customizationDetails: {
-        icing,
-        size,
-        shape,
-        CelebrationExtras,
-        AdditionalDescription,
-        customMessage,
-        preferredColors
-      }
-    });
-
-    await newOrder.save();
-    res.status(201).send(newOrder); // Send the created order back in the response
-  } catch (error) {
-    console.error('Error creating order:', error); // Log the error for debugging
-    res.status(500).send({ error: 'Failed to create order' }); // Respond with error message
-  }
-});
-
-
+   
 // Get all orders (GET)
 router.get('/orders', async (req, res) => {
   try {
