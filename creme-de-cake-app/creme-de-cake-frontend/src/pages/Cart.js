@@ -1,72 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios'; // Import axios for API calls
 import '../styles.css';
 
 function Cart() {
-  const navigate = useNavigate(); // Initialize navigate for programmatic navigation
-  const location = useLocation(); // To get passed state from Customize.js
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Sample cart items (this ideally come from state or a context)
-  const initialCartItems = [
-    {
-      id: 1,
-      name: 'Chocolate Cake',
-      icing: 'Fresh Cream',
-      size: 2,
-      shape: 'Round',
-      CelebrationExtras: ['Sprinkles', 'Candles'],
-      AdditionalDescription: 'Rich chocolate with layers of fudge.',
-      image: '/images/freshcream.jpg',
-      customMessage: 'Happy Birthday John!',
-      preferredColors: ['Brown', 'Gold'],
-      price: 1500,
-    },
-    {
-      id: 2,
-      name: 'Vanilla Cake',
-      icing: 'Soft Icing',
-      size: 1.5,
-      shape: 'Square',
-      CelebrationExtras: ['Floral Touch'],
-      AdditionalDescription: 'Classic vanilla with a hint of buttercream.',
-      image: '/images/softicing.jpg',
-      customMessage: 'Congratulations!',
-      preferredColors: ['White', 'Silver'],
-      price: 1200, // Fixed the repeated line issue
-    },
-  ];
+  const [cartItems, setCartItems] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-  // Initialize cartItems with initialCartItems
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  // Fetch cart items from the backend on component mount
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/cart'); // Fetch cart data from backend
+        setCartItems(response.data);
+        calculateTotalPrice(response.data);
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
+      }
+    };
 
-  // Check if a custom cake is passed from the Customize.js page
+    fetchCartItems();
+  }, []);
+
+  // Add new custom cake from Customize.js page
   useEffect(() => {
     if (location.state?.customCake) {
       const newCake = {
-        id: cartItems.length + 1, // Increment ID based on current cart size
-        name: 'Custom Cake', // Default name for custom cakes
-        ...location.state.customCake, // Spread the custom cake details from state
-        price: 2000, // Placeholder price, update with real pricing logic later
+        id: cartItems.length + 1,
+        name: 'Custom Cake',
+        ...location.state.customCake,
+        price: 2000,
       };
-
-      // Add the new custom cake to the cart
-      setCartItems(prevCartItems => [...prevCartItems, newCake]);
+      setCartItems((prevCartItems) => [...prevCartItems, newCake]);
+      calculateTotalPrice([...cartItems, newCake]);
+      saveCartToDB([...cartItems, newCake]); // Save to database
     }
-  }, [location.state, cartItems.length]);
+  }, [location.state, cartItems]);
 
-  // Function to remove an item from the cart by ID
+  // Function to calculate total price of all items in the cart
+  const calculateTotalPrice = (items) => {
+    const total = items.reduce((acc, item) => acc + item.price, 0);
+    setTotalPrice(total);
+  };
+
+  // Function to save cart items to MongoDB
+  const saveCartToDB = async (cart) => {
+    try {
+      await axios.post('http://localhost:5000/api/cart', { cart }); // Save cart items in backend
+    } catch (error) {
+      console.error('Error saving cart to database:', error);
+    }
+  };
+
+  // Remove item from cart by ID and update in MongoDB
   const removeItemFromCart = (id) => {
-    setCartItems(prevCartItems => prevCartItems.filter(item => item.id !== id));
+    const updatedCart = cartItems.filter((item) => item.id !== id);
+    setCartItems(updatedCart);
+    calculateTotalPrice(updatedCart);
+    saveCartToDB(updatedCart);
   };
 
-  // Function to calculate the total price of the cart
-  const calculateTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.price, 0);
+  // Handle adding another custom cake
+  const addAnotherCustomization = () => {
+    navigate('/customize'); // Redirect to customization page
   };
 
-  // Define handleEditItem (if you want to enable editing of items)
-  const handleEditItem = (item) => {
-    navigate('/customize', { state: { item } }); // Navigate to Customize page
+  // Handle proceeding to checkout
+  const proceedToCheckout = () => {
+    navigate('/checkout', { state: { cartItems } }); // Navigate to checkout with cart data
   };
 
   return (
@@ -82,7 +86,7 @@ function Cart() {
         </div>
       ) : (
         <>
-          {/* Cart items display */}
+          {/* Cart Items */}
           {cartItems.map((item) => (
             <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff', border: '1px solid #3e2c41' }}>
               <div className="row no-gutters">
@@ -94,27 +98,19 @@ function Cart() {
                     <h5 className="card-title" style={{ color: '#3e2c41' }}>{item.name}</h5>
                     <p className="card-text" style={{ color: '#3e2c41' }}>
                       <strong>Icing:</strong> {item.icing}<br />
-                      <strong>Size:</strong> {item.size} kg<br />
+                      <strong>Size:</strong> {item.sizeInKgs} kg<br />
                       <strong>Shape:</strong> {item.shape}<br />
-                      <strong>Celebration Extras:</strong> {(item.CelebrationExtras || []).join(', ')}<br /> {/* Safeguard with default empty array */}
+                      <strong>Celebration Extras:</strong> {(item.CelebrationExtras || []).join(', ')}<br />
                       <strong>Additional Description:</strong> {item.AdditionalDescription}<br />
-                      <strong>Custom Message:</strong> {item.customMessage}<br />
-                      <strong>Preferred Colors:</strong> {(item.preferredColors || []).join(', ')}<br /> {/* Safeguard with default empty array */}
+                      <strong>Custom Message:</strong> {item.message}<br />
+                      <strong>Preferred Colors:</strong> {(item.preferredColors || []).join(', ')}<br />
                       <strong>Price:</strong> Ksh {item.price}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Edit and Remove Buttons */}
               <div className="d-flex justify-content-between">
-                <button
-                  onClick={() => handleEditItem(item)} // Redirect to Customize page
-                  className="btn"
-                  style={{ backgroundColor: '#4CAF50', color: '#fff' }} // Updated button color
-                >
-                  Edit Item
-                </button>
                 <button
                   onClick={() => removeItemFromCart(item.id)}
                   className="btn btn-danger"
@@ -127,14 +123,21 @@ function Cart() {
 
           {/* Total Price */}
           <div className="text-center mb-4">
-            <h4 style={{ color: '#3e2c41' }}>Total Price: Ksh {calculateTotalPrice()}</h4>
+            <h4 style={{ color: '#3e2c41' }}>Total Price: Ksh {totalPrice}</h4>
           </div>
 
-          {/* Checkout Button */}
+          {/* Add Another Customization Button */}
+          <div className="text-center mb-4">
+            <button onClick={addAnotherCustomization} className="btn" style={{ backgroundColor: '#3e2c41', color: '#fff' }}>
+              Add Another Customization
+            </button>
+          </div>
+
+          {/* Proceed to Checkout Button */}
           <div className="text-center">
-            <Link to="/checkout" className="btn" style={{ backgroundColor: '#3e2c41', color: '#fff' }}>
+            <button onClick={proceedToCheckout} className="btn" style={{ backgroundColor: '#3e2c41', color: '#fff' }}>
               Proceed to Checkout
-            </Link>
+            </button>
           </div>
         </>
       )}
@@ -143,3 +146,4 @@ function Cart() {
 }
 
 export default Cart;
+
