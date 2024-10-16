@@ -1,26 +1,17 @@
 const mongoose = require('mongoose');
 
 const customizationSchema = new mongoose.Schema({
-    cakeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Cake', required: true },  // Reference to Cake
-    flavor: { type: String },  // Selected flavor from the options
-    customFlavor: { type: String },  // User-defined custom flavor
-    sizeInKgs: { type: Number, required: true },  // Cake size in kilograms
-    decorations: [{ type: String }],  // Selected decorations
-    icingType: {
-        type: String,
-        enum: ['Hard icing', 'Soft icing', 'Fresh cream'],
-        required: true
-    },
-    shape: {
-        type: String,
-        enum: ['Square', 'Round', 'Stacked', 'HeartShape'],
-        required: true
-    },
-    CelebrationExtras: [{ type: String }],  // Extras like sprinkles, candles, etc.
-    message: { type: String },  // Custom message for the cake
-    AdditionalDescription: { type: String },  // Additional details for customization
-    preferredColors: [{ type: String }],  // Preferred colors for the cake design
-    designImage: { type: String }  // Uploaded image for the desired cake design
+  cakeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Cake' },
+  flavor: String,
+  customFlavor: String, enum ['price:1500']
+  sizeInKgs: Number,
+  icingType: { type: String, enum: ['Hard icing', 'Soft icing', 'Fresh cream'] },
+  shape: { type: String, enum: ['Square', 'Round', 'Stacked', 'HeartShape'] },
+  celebrationExtras: String, enum: ['Sprinkles: 300', 'Flowers: 400', 'Candles: 250', 'Edible Glitter: 600']
+  message: String,
+  additionalDescription: String,
+  preferredColors: [String],
+  designImage: String,
 });
 
 const Customization = mongoose.model('Customization', customizationSchema);

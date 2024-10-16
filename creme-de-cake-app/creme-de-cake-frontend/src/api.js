@@ -1,7 +1,58 @@
 import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
  
+// Create a pre-configured instance of Axios
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api',  
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+
+// Function to get cart items
+export const getCartItems = async () => {
+  try {
+    const response = await api.get('/cart'); 
+    return response.data;  // Return the data received from the backend
+  } catch (error) {
+    console.error('Error fetching cart items:', error);
+    throw error;  // Rethrow the error to be handled by the calling function
+  }
+};
+
+// Function to add an item to the cart
+export const addToCart = async (item) => {
+  try {
+    const response = await api.post('/cart', item);  // Post item to the cart
+    return response.data;  // Return the updated cart data
+  } catch (error) {
+    console.error('Error adding item to cart:', error);
+    throw error;  // Rethrow the error for handling
+  }
+};
+
+// Function to remove an item from the cart
+export const removeFromCart = async (itemId) => {
+  try {
+    const response = await api.delete(`/cart/${itemId}`);  // Delete item by ID
+    return response.data;  // Return the updated cart data
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    throw error;  // Rethrow the error for handling
+  }
+};
+
+// Function to clear the cart
+export const clearCart = async () => {
+  try {
+    const response = await api.delete('/cart');  // Clear the entire cart
+    return response.data;  // Return confirmation or updated cart data
+  } catch (error) {
+    console.error('Error clearing the cart:', error);
+    throw error;  // Rethrow the error for handling
+  }
+};
+
 
 //Fetching Profile Data
 useEffect(() => {
