@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import '../styles.css'; // Assuming the same styles apply here
+import '../styles.css'; 
 
 function Checkout() {
-  const { orderId } = useParams(); // Assuming orderId is passed through the URL
+  const { orderId } = useParams(); 
   const [cartItems, setCartItems] = useState([]);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -22,10 +22,9 @@ function Checkout() {
     const currentDate = new Date().toISOString().slice(0, 16);
     setOrderDate(currentDate);
     
-    // Fetch cake details from backend
+        // Fetch cake details from backend
     const fetchCakeDetails = async () => {
       try {
-        // Replace this with your backend API URL to fetch order details
         const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
         const orderData = response.data;
 
@@ -42,7 +41,7 @@ function Checkout() {
             image: orderData.image,
             customMessage: orderData.customMessage,
             preferredColors: orderData.preferredColors,
-            price: await calculateTotalPrice(orderData.cakeId, orderData.size),  // Fetch the price from the backend
+            price: orderData.totalPrice, // Use the price from the backend
           },
         ]);
 
@@ -74,17 +73,6 @@ function Checkout() {
     setPaymentMethod(e.target.value);
   };
 
-  const calculateTotalPrice = async (cakeId, numOfKgs) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/cakes/${cakeId}`);
-      const cake = response.data;
-      const totalPrice = cake.basePrice * numOfKgs;  // Assume backend returns base price per kg
-      return totalPrice;
-    } catch (error) {
-      console.error('Error calculating total price:', error);
-      return 0;
-    }
-  };
 
   const handleOrderConfirmation = () => {
     if (!paymentMethod) {
