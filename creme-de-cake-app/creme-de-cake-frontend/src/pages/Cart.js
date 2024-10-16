@@ -1,125 +1,119 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'; // Import axios for API calls
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios'; 
 import '../styles.css';
 
 function Cart() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const [cartItems, setCartItems] = useState([]); // Ensure cartItems is initialized as an array
+  const [customizations, setCustomizations] = useState([]); // Store fetched customizations
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // Fetch cart items from the backend on component mount
+  // Fetch saved customizations from the backend
   useEffect(() => {
-    const fetchCartItems = async () => {
+    const fetchCustomizations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/cart'); // Fetch cart data from backend
-        const items = response.data || []; // Ensure response is always an array
-        console.log('Fetched cart items:', items); // Log the fetched data for debugging
-        setCartItems(items);
-        calculateTotalPrice(items);
+        const response = await axios.get('http://localhost:5000/api/customizations'); // Fetch customizations
+        const fetchedCustomizations = response.data || [];
+        console.log('Fetched customizations:', fetchedCustomizations); // Log for debugging
+        setCustomizations(fetchedCustomizations);
+        calculateTotalPrice(fetchedCustomizations);
       } catch (error) {
-        console.error('Error fetching cart items:', error);
+        console.error('Error fetching customizations:', error);
       }
     };
 
-    fetchCartItems();
+    fetchCustomizations();
   }, []);
 
-  // Add new custom cake from Customize.js page
-  useEffect(() => {
-    if (location.state?.customCake) {
-      const newCake = {
-        id: cartItems.length + 1,
-        name: 'Custom Cake',
-        ...location.state.customCake,
-        price: 2000,
-      };
-      const updatedCartItems = [...cartItems, newCake];
-      setCartItems(updatedCartItems);
-      calculateTotalPrice(updatedCartItems);
-      saveCartToDB(updatedCartItems); // Save to database
-    }
-  }, [location.state, cartItems]);
+  // Function to calculate total price based on customizations
 
-  // Function to calculate total price of all items in the cart
-  const calculateTotalPrice = (items) => {
-    const total = items.reduce((acc, item) => acc + (item.price || 0), 0); // Ensure item.price exists
-    setTotalPrice(total);
-  };
+orderSchema.methods.calculateTotalPrice = async function() {
+  const customization = await this.model('Customization').findById(this.customization).populate('cakeId');
+  const cake = await this.model('Cake').findById(customization.cakeId);
 
-  // Function to save cart items to MongoDB
-  const saveCartToDB = async (cart) => {
-    try {
-      await axios.post('http://localhost:5000/api/cart', { cart }); // Save cart items in backend
-    } catch (error) {
-      console.error('Error saving cart to database:', error);
-    }
-  };
+  // 1. Check if custom flavor is chosen, otherwise use standard flavor
+  let basePricePerKg = 0;
+  if (customization.customFlavor) {
+    // Extract custom flavor price from the string (e.g., "Custom flavor:1500")
+    basePricePerKg = parseInt(customization.customFlavor.split(':')[1], 10);
+  } else {
+    // Use the highest standard flavor price
+    basePricePerKg = cake.calculatePrice(customization.sizeInKgs);
+  }
 
-  // Remove item from cart by ID and update in MongoDB
-  const removeItemFromCart = (id) => {
-    const updatedCart = cartItems.filter((item) => item.id !== id);
-    setCartItems(updatedCart);
-    calculateTotalPrice(updatedCart);
-    saveCartToDB(updatedCart);
-  };
+  // 2. Calculate celebration extras' price
+  let extrasPrice = 0;
+  customization.celebrationExtras.forEach(extra => {
+    const extraPrice = parseInt(extra.split(':')[1], 10);  // Extract price from 'Extra:Price'
+    extrasPrice += extraPrice;
+  });
 
-  // Handle adding another custom cake
+  // 3. Calculate total price for the order
+  const cakeBasePrice = basePricePerKg * customization.sizeInKgs;
+  this.totalPrice = (cakeBasePrice + extrasPrice) * this.quantity;
+  return this.totalPrice;
+};
+
+
+  // Handle redirect to customization page for adding another custom cake
   const addAnotherCustomization = () => {
     navigate('/customize'); // Redirect to customization page
   };
 
   // Handle proceeding to checkout
   const proceedToCheckout = () => {
-    navigate('/checkout', { state: { cartItems } }); // Navigate to checkout with cart data
+    navigate('/checkout', { state: { customizations } }); // Navigate to checkout with customizations
   };
 
   return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '30px' }}>Treat Basket</h1>
       <p className="text-center" style={{ color: '#3e2c41', marginBottom: '40px' }}>
-        Review your selected cakes and customize them before checkout.
+        Take a moment to review your sweet selections and add the perfect finishing touches before checkout! 🍰✨ Customize your cakes to make them truly yours.
       </p>
 
-      {Array.isArray(cartItems) && cartItems.length === 0 ? (
+      {customizations.length === 0 ? (
         <div className="text-center" style={{ color: '#3e2c41' }}>
-          <h4>Your cart is empty. Start adding some delicious cakes!</h4>
+          <h4>Your treat basket is feeling a bit lonely! 🍰 Start adding your favorite cakes and sweet creations to make your celebration extra special.</h4>
+          <button
+            onClick={() => navigate('/customize')}
+            className="btn mt-4"
+            style={{ backgroundColor: '#3e2c41', color: '#fff' }}
+          >
+            Customize Your Cake
+          </button>
         </div>
       ) : (
         <>
-          {/* Cart Items */}
-          {Array.isArray(cartItems) && cartItems.map((item) => (
-            <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff', border: '1px solid #3e2c41' }}>
+          {/* Customization Items */}
+          {customizations.map((item) => (
+            <div key={item._id} className="card mb-3" style={{ backgroundColor: '#fff', border: '1px solid #3e2c41' }}>
               <div className="row no-gutters">
                 <div className="col-md-4">
-                  <img src={item.image} className="card-img" alt={item.name} />
+                  {/* Display designImage if available */}
+                  {item.designImage ? (
+                    <img src={item.designImage} className="card-img" alt="Custom Cake Design" />
+                  ) : (
+                    <div style={{ height: '150px', backgroundColor: '#f0f0f0' }} />
+                  )}
                 </div>
                 <div className="col-md-8">
                   <div className="card-body">
-                    <h5 className="card-title" style={{ color: '#3e2c41' }}>{item.name}</h5>
+                    <h5 className="card-title" style={{ color: '#3e2c41' }}>Custom Cake</h5>
                     <p className="card-text" style={{ color: '#3e2c41' }}>
-                      <strong>Icing:</strong> {item.icing}<br />
+                      <strong>Flavor:</strong> {item.flavor}<br />
+                      {item.customFlavor && <><strong>Custom Flavor:</strong> {item.customFlavor}<br /></>}
                       <strong>Size:</strong> {item.sizeInKgs} kg<br />
+                      <strong>Icing:</strong> {item.icingType}<br />
                       <strong>Shape:</strong> {item.shape}<br />
-                      <strong>Celebration Extras:</strong> {(item.CelebrationExtras || []).join(', ')}<br />
-                      <strong>Additional Description:</strong> {item.AdditionalDescription}<br />
+                      <strong>Celebration Extras:</strong> {(item.celebrationExtras || []).join(', ')}<br />
                       <strong>Custom Message:</strong> {item.message}<br />
-                      <strong>Preferred Colors:</strong> {(item.preferredColors || []).join(', ')}<br />
-                      <strong>Price:</strong> Ksh {item.price}
+                      {item.additionalDescription && <><strong>Additional Description:</strong> {item.additionalDescription}<br /></>}
+                      {item.preferredColors && <><strong>Preferred Colors:</strong> {item.preferredColors}<br /></>}
+                      <strong>Price:</strong> Ksh {item.price || 2000} {/* Assume default price */}
                     </p>
                   </div>
                 </div>
-              </div>
-
-              <div className="d-flex justify-content-between">
-                <button
-                  onClick={() => removeItemFromCart(item.id)}
-                  className="btn btn-danger"
-                >
-                  Remove
-                </button>
               </div>
             </div>
           ))}
