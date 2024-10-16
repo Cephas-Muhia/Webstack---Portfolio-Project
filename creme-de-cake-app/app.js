@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const cakeRoutes = require('./routes/cakeRoutes');
-require('./config/passport')(passport);
+const orderRoutes = require('./routes/orderRoutes');
+const userRoutes = require('./routes/userRoutes');
+require('./config/passport')(passport); // Passport configuration
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,18 +20,21 @@ app.use(cors({
     credentials: true
 }));
 
-
-// Serve static files
+// Serve static files from the frontend
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/dist')));
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/public')));
-
 
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cakes', cakeRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/creme_de_cake')
+mongoose.connect('mongodb://localhost:27017/creme_de_cake', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => {
         console.log('MongoDB connected successfully!');
         app.listen(PORT, () => {
@@ -40,7 +45,7 @@ mongoose.connect('mongodb://localhost:27017/creme_de_cake')
         console.error('MongoDB connection error:', err);
     });
 
-// Handle frontend routing (for single-page applications)
+// Handle frontend routing for a single-page application (SPA)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'creme-de-cake-frontend', 'dist', 'index.html'));
 });
