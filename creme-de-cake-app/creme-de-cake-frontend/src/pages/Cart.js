@@ -25,13 +25,14 @@ function Cart() {
     fetchCustomizations();
   }, []);
 
-  // Function to calculate total price based on customizations
-  const calculateTotalPrice = (customizations) => {
-    let price = 0;
-    customizations.forEach(item => {
-      price += item.price || 2000; // Assume default price if not provided
-    });
-    setTotalPrice(price);
+    // Function to calculate total price based on customizations
+  const calculateTotalPrice = async (customizations) => {
+    let total = 0;
+    for (const customization of customizations) {
+      const response = await axios.get(`http://localhost:5000/api/orders/calculate-price/${customization._id}`);
+      total += response.data.totalPrice; // Assume the backend returns the total price
+    }
+    setTotalPrice(total);
   };
 
   // Handle redirect to customization page for adding another custom cake
@@ -43,6 +44,7 @@ function Cart() {
   const proceedToCheckout = () => {
     navigate('/checkout', { state: { customizations } }); // Navigate to checkout with customizations
   };
+
 
   return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh' }}>
