@@ -172,6 +172,28 @@ router.post('/users/login', async (req, res) => {
 
 // -------------------- CRUD for Cakes -------------------- //
 
+//fetching the cake details
+router.get('/api/cakes/:id', async (req, res) => {
+  try {
+    const cake = await Cake.findById(req.params.id);
+    if (!cake) {
+      return res.status(404).json({ message: 'Cake not found' });
+    }
+    
+    res.json({
+      cakeId: cake._id,
+      name: cake.name,
+      basePrice: cake.basePrice,
+      flavors: cake.flavors,
+      icingTypes: cake.icingTypes,
+      availableShapes: cake.availableShapes,
+      image: cake.image
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching cake', error });
+  }
+});
+
 // Get all cakes (GET)
 router.get('/cakes', async (req, res) => {
   try {
@@ -261,7 +283,34 @@ router.delete('/customizations/:id', async (req, res) => {
 });
 
 // -------------------- CRUD for Orders -------------------- //
+const calculateTotalPrice = (cakeBasePrice, sizeInKgs, extras) => {
+  let totalPrice = cakeBasePrice * sizeInKgs;
+  extras.forEach(extra => {
+    totalPrice += extra.price;
+  });
+  return totalPrice;
+};
+
+router.get('/api/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('cakeId');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Calculate total price based on size and extras
+    const totalPrice = calculateTotalPrice(order.cakeId.basePrice, order.size, order.CelebrationExtras);
+
+    res.json({
+      ...order._doc,
+      totalPrice  // Include calculated price in the response
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching order', error });
+  }
+});
    
+
 // Get all orders (GET)
 router.get('/orders', async (req, res) => {
   try {

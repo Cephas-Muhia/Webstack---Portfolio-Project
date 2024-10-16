@@ -7,7 +7,7 @@ function Cart() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]); // Ensure cartItems is initialized as an array
   const [totalPrice, setTotalPrice] = useState(0);
 
   // Fetch cart items from the backend on component mount
@@ -15,8 +15,10 @@ function Cart() {
     const fetchCartItems = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/cart'); // Fetch cart data from backend
-        setCartItems(response.data);
-        calculateTotalPrice(response.data);
+        const items = response.data || []; // Ensure response is always an array
+        console.log('Fetched cart items:', items); // Log the fetched data for debugging
+        setCartItems(items);
+        calculateTotalPrice(items);
       } catch (error) {
         console.error('Error fetching cart items:', error);
       }
@@ -34,15 +36,16 @@ function Cart() {
         ...location.state.customCake,
         price: 2000,
       };
-      setCartItems((prevCartItems) => [...prevCartItems, newCake]);
-      calculateTotalPrice([...cartItems, newCake]);
-      saveCartToDB([...cartItems, newCake]); // Save to database
+      const updatedCartItems = [...cartItems, newCake];
+      setCartItems(updatedCartItems);
+      calculateTotalPrice(updatedCartItems);
+      saveCartToDB(updatedCartItems); // Save to database
     }
   }, [location.state, cartItems]);
 
   // Function to calculate total price of all items in the cart
   const calculateTotalPrice = (items) => {
-    const total = items.reduce((acc, item) => acc + item.price, 0);
+    const total = items.reduce((acc, item) => acc + (item.price || 0), 0); // Ensure item.price exists
     setTotalPrice(total);
   };
 
@@ -80,14 +83,14 @@ function Cart() {
         Review your selected cakes and customize them before checkout.
       </p>
 
-      {cartItems.length === 0 ? (
+      {Array.isArray(cartItems) && cartItems.length === 0 ? (
         <div className="text-center" style={{ color: '#3e2c41' }}>
           <h4>Your cart is empty. Start adding some delicious cakes!</h4>
         </div>
       ) : (
         <>
           {/* Cart Items */}
-          {cartItems.map((item) => (
+          {Array.isArray(cartItems) && cartItems.map((item) => (
             <div key={item.id} className="card mb-3" style={{ backgroundColor: '#fff', border: '1px solid #3e2c41' }}>
               <div className="row no-gutters">
                 <div className="col-md-4">

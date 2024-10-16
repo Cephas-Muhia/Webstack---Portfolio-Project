@@ -1,12 +1,12 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Use useNavigate for navigation
+import { useNavigate } from 'react-router-dom'; // Use useNavigate for navigation
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // Import Axios
 
 function Catalogue() {
   const navigate = useNavigate(); // Initialize navigation hook
 
-const cakes = [
+  const cakes = [
     { id: 1, name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg' },
     { id: 2, name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg' },
     { id: 3, name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg' },
@@ -71,7 +71,7 @@ const cakes = [
     >
       <div className="container text-center">
         {/* Title and description */}
-        <h1 className="display-4 font-weight-bold mb-3">Flavour Wonderland</h1>
+        <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland😊</h1>
         <p className="lead mb-4">
           Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
         </p>
@@ -86,11 +86,11 @@ const cakes = [
                 src={cake.imgUrl}
                 className="card-img-top"
                 alt={cake.name}
-                style={{ borderRadius: '10px 10px 0 0' }}
+                style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
               />
-              <div className="card-body">
-                <h5 className="card-title">{cake.name}</h5>
-                <p className="card-text">{cake.description}</p>
+              <div className="card-body text-center">
+                <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
+                <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
                 <button
                   className="btn btn-lg"
                   style={{ backgroundColor: '#3e2c41', color: 'white' }}
@@ -108,5 +108,4 @@ const cakes = [
 }
 
 export default Catalogue;
-
 
