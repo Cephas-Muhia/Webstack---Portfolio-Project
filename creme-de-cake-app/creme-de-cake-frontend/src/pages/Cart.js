@@ -16,7 +16,7 @@ function Cart() {
         const fetchedCustomizations = response.data || [];
         console.log('Fetched customizations:', fetchedCustomizations); // Log for debugging
         setCustomizations(fetchedCustomizations);
-        calculateTotalPrice(fetchedCustomizations);
+        calculateTotalPrice(fetchedCustomizations); // Calculate total price
       } catch (error) {
         console.error('Error fetching customizations:', error);
       }
@@ -26,34 +26,13 @@ function Cart() {
   }, []);
 
   // Function to calculate total price based on customizations
-
-orderSchema.methods.calculateTotalPrice = async function() {
-  const customization = await this.model('Customization').findById(this.customization).populate('cakeId');
-  const cake = await this.model('Cake').findById(customization.cakeId);
-
-  // 1. Check if custom flavor is chosen, otherwise use standard flavor
-  let basePricePerKg = 0;
-  if (customization.customFlavor) {
-    // Extract custom flavor price from the string (e.g., "Custom flavor:1500")
-    basePricePerKg = parseInt(customization.customFlavor.split(':')[1], 10);
-  } else {
-    // Use the highest standard flavor price
-    basePricePerKg = cake.calculatePrice(customization.sizeInKgs);
-  }
-
-  // 2. Calculate celebration extras' price
-  let extrasPrice = 0;
-  customization.celebrationExtras.forEach(extra => {
-    const extraPrice = parseInt(extra.split(':')[1], 10);  // Extract price from 'Extra:Price'
-    extrasPrice += extraPrice;
-  });
-
-  // 3. Calculate total price for the order
-  const cakeBasePrice = basePricePerKg * customization.sizeInKgs;
-  this.totalPrice = (cakeBasePrice + extrasPrice) * this.quantity;
-  return this.totalPrice;
-};
-
+  const calculateTotalPrice = (customizations) => {
+    let price = 0;
+    customizations.forEach(item => {
+      price += item.price || 2000; // Assume default price if not provided
+    });
+    setTotalPrice(price);
+  };
 
   // Handle redirect to customization page for adding another custom cake
   const addAnotherCustomization = () => {
