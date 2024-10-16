@@ -1,26 +1,24 @@
 const Order = require('../models/Order');
-const Customization = require('../models/Customization');
 
 // Create a new order
-exports.createOrder = async (req, res) => {
+const createOrder = async (req, res) => {
   try {
-    const { user, cake, quantity, totalPrice, customization } = req.body;
-    const newOrder = new Order({ user, cake, quantity, totalPrice, customization });
-    await newOrder.save();
-    res.status(201).json({ order: newOrder });
+    const { flavor, user } = req.body;
+
+    // Create a new order with the provided details
+    const newOrder = new Order({
+      user, // Assume the user is authenticated and we get the user ID from the middleware
+      cakeFlavor: flavor,
+      orderDate: Date.now(),
+    });
+
+    const savedOrder = await newOrder.save();
+
+    res.status(201).json({ order: savedOrder });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ message: 'Error creating order', error });
   }
 };
 
-// Get orders by user ID
-exports.getOrdersByUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const orders = await Order.find({ user: userId }).populate('cake');
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+module.exports = { createOrder };
 

@@ -1,0 +1,19 @@
+const express = require('express');
+const Customization = require('./models/Customization'); // Adjust the path based on your structure
+
+const router = express.Router();
+
+// Route for submitting customizations
+router.post('/customizations', async (req, res) => {
+  try {
+    const customizationData = new Customization(req.body); // Create a new customization document
+    await customizationData.save(); // Save to the database
+    res.status(201).json({ message: 'Customization saved successfully!', data: customizationData });
+  } catch (error) {
+    console.error('Error saving customization:', error);
+    res.status(500).json({ message: 'Error saving customization.', error: error.message });
+  }
+});
+
+module.exports = router;
+

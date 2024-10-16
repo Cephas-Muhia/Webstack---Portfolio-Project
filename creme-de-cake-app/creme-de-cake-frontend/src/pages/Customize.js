@@ -14,9 +14,9 @@ function Customize() {
     decorations: [],
     icingType: 'Soft icing',
     shape: 'Round',
-    CelebrationExtras: [],
+    celebrationExtras: [], // Note the correct casing
     message: '',
-    AdditionalDescription: '',
+    additionalDescription: '', // Note the correct casing
     preferredColors: [],
     designImage: ''
   });
@@ -106,9 +106,9 @@ function Customize() {
       decorations: [],
       icingType: 'Soft icing',
       shape: 'Round',
-      CelebrationExtras: [],
+      celebrationExtras: [],
       message: '',
-      AdditionalDescription: '',
+      additionalDescription: '',
       preferredColors: [],
       designImage: ''
     });

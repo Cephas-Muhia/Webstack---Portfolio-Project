@@ -1,10 +1,11 @@
 const express = require('express');
-const { updatePreferredFlavors } = require('../controllers/userController');
-
 const router = express.Router();
 
-// Update preferred flavors
-router.post('/preferred-flavors', updatePreferredFlavors);
+const { savePreferredFlavor } = require('../controllers/userController');
+const { protect } = require('../middlewares/authMiddleware');
+
+// Route to save preferred cake flavor for a user
+router.post('/preferred-flavors', protect, savePreferredFlavor);
 
 module.exports = router;
 
