@@ -5,31 +5,32 @@ import axios from 'axios';
 import '../styles.css'; 
 
 const Profile = () => {
+  const [isEditing, setIsEditing] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     name: '',
     email: '',
     phoneNumber: '',
-    password: '',
-    confirmPassword: '',
+    profilePhoto: null,
+    birthday: '',
+    address: '',
     preferredCakeFlavors: [],
-    profilePicture: '',
+    password: '',
+    confirmPassword: ''
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const userId = 'YOUR_USER_ID'; // Replace with actual user ID or fetch from auth context
-
+  // Fetch user profile data from the backend on component mount
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/${userId}`);
-        setProfileInfo(response.data);
+        const { data } = await axios.get('http://localhost:5000/api/users/profile'); 
+        setProfileInfo(data);
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        console.error('Error fetching profile:', error);
       }
     };
 
-    fetchUserProfile();
-  }, [userId]);
+    fetchProfile();
+  }, []);
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -42,38 +43,17 @@ const Profile = () => {
       [name]: value,
     }));
   };
-      //Handling profile picture New
-  const handleProfilePictureChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const formData = new FormData();
-    formData.append('profilePicture', file);
 
-    axios.post(`http://localhost:5000/api/users/${userId}/upload`, formData)
-      .then(response => {
-        setProfileInfo(prevInfo => ({ ...prevInfo, profilePicture: response.data.filePath }));
-      })
-      .catch(error => {
-        console.error("Error uploading profile picture:", error);
-      });
-  }
-};
-     //updating profile picture
-   const handleUpdateProfile = async () => {
-  try {
-    const response = await axios.put(`http://localhost:5000/api/users/${userId}`, profileInfo);
-    alert('Profile updated successfully!');
-    setIsEditing(false); // Exit editing mode after successful update
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    alert('Error updating profile. Please try again.');
-  }
-};
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    setProfileInfo((prevState) => ({
+      ...prevState,
+      profilePhoto: URL.createObjectURL(file),
+    }));
+  };
 
-
-  
   const handleGoogleLoginSuccess = (credentialResponse) => {
-    const userProfile = JSON.parse(atob(credentialResponse.credential.split('.')[1])); // Decode JWT to get user profile
+    const userProfile = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
 
     setProfileInfo({
       name: userProfile.name,
@@ -92,8 +72,20 @@ const Profile = () => {
     console.error('Google login failed:', response);
   };
 
+  // Handle profile update submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const { data } = await axios.put('http://localhost:5000/api/users/profile', profileInfo);
+      console.log('Profile updated:', data);
+      setIsEditing(false); // Disable editing after saving
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
   const handleCancel = () => {
-    // Reset profile info to default values
     setProfileInfo({
       name: '',
       email: '',
@@ -117,7 +109,7 @@ const Profile = () => {
       <Row className="text-center mb-4">
         <Col>
           <img
-            src={profileInfo.profilePhoto || '/path/to/default-avatar.png'} // Default avatar image
+            src={profileInfo.profilePhoto || '/path/to/default-avatar.png'}
             alt="Profile"
             style={{ borderRadius: '50%', width: '150px', height: '150px', objectFit: 'cover', marginBottom: '1rem' }}
           />
@@ -131,14 +123,15 @@ const Profile = () => {
                   fontSize: '1.2rem',
                 }}
               >
-                "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more! It’s quick, easy, and tailored just for you – register now and make your cake experience even sweeter!" 🎂✨
+                "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more!"
               </Form.Label>
-            </Form>
+              <Form.Control type="file" onChange={handlePhotoUpload} style={{ display: 'block', margin: 'auto' }} />
+            </Form.Group>
           )}
         </Col>
       </Row>
 
-      <Form>
+      <Form onSubmit={handleSubmit}>
         {/* Name Field */}
         <Form.Group as={Row} className="mb-3" controlId="formPlaintextName">
           <Form.Label column sm="2" style={{ fontFamily: 'Poppins, sans-serif', color: '#3e2c41' }}>
@@ -329,24 +322,25 @@ const Profile = () => {
             </Form.Group>
           </>
         )}
-
+         
         {/* Edit/Save Buttons */}
-        <div className="d-flex justify-content-between mt-4">
-          {isEditing ? (
-            <>
-              <Button variant="secondary" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button variant="success" onClick={handleUpdateProfile}>
-               Save Changes
-             </Button>
-            </>
-          ) : (
-            <Button variant="primary" onClick={handleEditToggle}>
-              Edit Profile
-            </Button>
-          )}
-        </div>
+        <div className="d-flex justify-content-between mt-4">         
+
+        {isEditing ? (
+          <Button type="submit" variant="success" style={{ backgroundColor: '#3e2c41', fontFamily: 'Poppins, sans-serif' }}>
+            Save Changes
+          </Button>
+        ) : (
+          <Button onClick={handleEditToggle} variant="primary" style={{ backgroundColor: '#3e2c41', fontFamily: 'Poppins, sans-serif' }}>
+            Edit Profile
+          </Button>
+        )}
+        {isEditing && (
+          <Button onClick={handleCancel} variant="secondary" style={{ marginLeft: '1rem', fontFamily: 'Poppins, sans-serif' }}>
+            Cancel
+          </Button>
+        )}
+       </div>
       </Form>
 
       {/* Google Login */}
@@ -360,6 +354,8 @@ const Profile = () => {
     </Container>
   );
 };
+    
+   
 
 export default Profile;
 
