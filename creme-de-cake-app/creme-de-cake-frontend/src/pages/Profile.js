@@ -1,21 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form, Col, Row, Container } from 'react-bootstrap';
-import { GoogleLogin } from '@react-oauth/google'; // Updated import
-import '../styles.css'; // additional styling if needed
+import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios'; 
+import '../styles.css'; 
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     name: '',
     email: '',
     phoneNumber: '',
-    profilePhoto: null,
-    birthday: '',
-    address: '',
-    preferredCake: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    preferredCakeFlavors: [],
+    profilePicture: '',
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const userId = 'YOUR_USER_ID'; // Replace with actual user ID or fetch from auth context
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/users/${userId}`);
+        setProfileInfo(response.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userId]);
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -28,15 +42,36 @@ const Profile = () => {
       [name]: value,
     }));
   };
+      //Handling profile picture New
+  const handleProfilePictureChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    setProfileInfo((prevState) => ({
-      ...prevState,
-      profilePhoto: URL.createObjectURL(file),
-    }));
-  };
+    axios.post(`http://localhost:5000/api/users/${userId}/upload`, formData)
+      .then(response => {
+        setProfileInfo(prevInfo => ({ ...prevInfo, profilePicture: response.data.filePath }));
+      })
+      .catch(error => {
+        console.error("Error uploading profile picture:", error);
+      });
+  }
+};
+     //updating profile picture
+   const handleUpdateProfile = async () => {
+  try {
+    const response = await axios.put(`http://localhost:5000/api/users/${userId}`, profileInfo);
+    alert('Profile updated successfully!');
+    setIsEditing(false); // Exit editing mode after successful update
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    alert('Error updating profile. Please try again.');
+  }
+};
 
+
+  
   const handleGoogleLoginSuccess = (credentialResponse) => {
     const userProfile = JSON.parse(atob(credentialResponse.credential.split('.')[1])); // Decode JWT to get user profile
 
@@ -47,7 +82,7 @@ const Profile = () => {
       profilePhoto: userProfile.picture,
       birthday: '',
       address: '',
-      preferredCake: '',
+      preferredCakeFlavors: [],
       password: '',
       confirmPassword: ''
     });
@@ -57,8 +92,23 @@ const Profile = () => {
     console.error('Google login failed:', response);
   };
 
+  const handleCancel = () => {
+    // Reset profile info to default values
+    setProfileInfo({
+      name: '',
+      email: '',
+      phoneNumber: '',
+      profilePhoto: null,
+      birthday: '',
+      address: '',
+      preferredCakeFlavors: [],
+      password: '',
+      confirmPassword: ''
+    });
+  };
+
   return (
-    <Container style={{ padding: '2rem', borderRadius: '8px', marginTop: '2rem' }}>
+    <Container style={{ padding: '2rem', borderRadius: '8px', marginTop: '2rem', backgroundColor: '#f5e1a4' }}>
       <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '2.5rem', color: '#3e2c41', textAlign: 'center' }}>
         My Profile
       </h2>
@@ -72,19 +122,18 @@ const Profile = () => {
             style={{ borderRadius: '50%', width: '150px', height: '150px', objectFit: 'cover', marginBottom: '1rem' }}
           />
           {isEditing && (
-            <Form.Group controlId="Registration" className="text-center">
+            <Form.Group controlId="ProfilePhoto" className="text-center">
               <Form.Label
                 style={{
                   fontFamily: 'Poppins, sans-serif',
                   color: '#3e2c41',
-                  fontWeight: 'bold', // Bold font
-                  fontSize: '1.2rem', // Optional: Increase font size for emphasis
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem',
                 }}
               >
                 "Create your profile today and unlock personalized cake recommendations, faster checkouts, exclusive offers, and more! It’s quick, easy, and tailored just for you – register now and make your cake experience even sweeter!" 🎂✨
               </Form.Label>
-              <Form.Control type="file" onChange={handlePhotoUpload} style={{ display: 'block', margin: 'auto' }} />
-            </Form.Group>
+            </Form>
           )}
         </Col>
       </Row>
@@ -208,33 +257,43 @@ const Profile = () => {
           <Col sm="10">
             {isEditing ? (
               <Form.Control
-                type="text"
-                name="preferredCake"
-                value={profileInfo.preferredCake}
+                as="select"
+                multiple
+                name="preferredCakeFlavors"
+                value={profileInfo.preferredCakeFlavors}
                 onChange={handleChange}
                 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem' }}
-                placeholder="e.g., Chocolate, Vanilla"
-              />
+              >
+                <option value="Marble">Marble</option>
+                <option value="Vanilla">Vanilla</option>
+                <option value="Orange">Orange</option>
+                <option value="Banana">Banana</option>
+                <option value="Pinacolada">Pinacolada</option>
+                <option value="Fruit cake">Fruit Cake</option>
+                <option value="Lemon">Lemon</option>
+                <option value="Red Velvet">Red Velvet</option>
+                <option value="Chocolate">Chocolate</option>
+                <option value="Black Forest">Black Forest</option>
+                <option value="White Forest">White Forest</option>
+                <option value="Eggless">Eggless</option>
+                <option value="Pineapple">Pineapple</option>
+                <option value="Blueberry">Blueberry</option>
+                <option value="Coffee">Coffee</option>
+                <option value="Cheesecake">Cheesecake</option>
+                <option value="Carrot">Carrot</option>
+                <option value="Coconut">Coconut</option>
+                <option value="Amarula">Amarula</option>
+                <option value="Strawberry">Strawberry</option>
+              </Form.Control>
             ) : (
               <p className="form-control-plaintext" style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem', color: '#3e2c41' }}>
-                {profileInfo.preferredCake || <em style={{ fontSize: '1rem' }}>Please register to update your preferred cake types.</em>}
+                {profileInfo.preferredCakeFlavors.length > 0 ? profileInfo.preferredCakeFlavors.join(', ') : <em style={{ fontSize: '1rem' }}>Please register to update your preferred cake types.</em>}
               </p>
             )}
           </Col>
         </Form.Group>
 
-        {/* Google Login Button */}
-        <Form.Group as={Row} className="mb-3" controlId="formGoogleLogin">
-          <Col sm="10" className="offset-sm-2">
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onFailure={handleGoogleLoginFailure}
-              style={{ width: '100%' }} // Optional: Adjust width as needed
-            />
-          </Col>
-        </Form.Group>
-
-        {/* Password and Confirm Password Fields (only if editing) */}
+        {/* Password Fields */}
         {isEditing && (
           <>
             <Form.Group as={Row} className="mb-3" controlId="formPlaintextPassword">
@@ -247,6 +306,7 @@ const Profile = () => {
                   name="password"
                   value={profileInfo.password}
                   onChange={handleChange}
+                  placeholder="Enter new password"
                   style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem' }}
                 />
               </Col>
@@ -262,6 +322,7 @@ const Profile = () => {
                   name="confirmPassword"
                   value={profileInfo.confirmPassword}
                   onChange={handleChange}
+                  placeholder="Confirm new password"
                   style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.2rem' }}
                 />
               </Col>
@@ -269,18 +330,33 @@ const Profile = () => {
           </>
         )}
 
-        {/* Buttons for editing and saving */}
-        <Form.Group as={Row} className="mb-3" controlId="formButtons">
-          <Col sm="10" className="offset-sm-2">
-            <Button variant="primary" onClick={handleEditToggle} style={{ marginRight: '1rem' }}>
-              {isEditing ? 'Save Changes' : 'Edit Profile'}
+        {/* Edit/Save Buttons */}
+        <div className="d-flex justify-content-between mt-4">
+          {isEditing ? (
+            <>
+              <Button variant="secondary" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button variant="success" onClick={handleUpdateProfile}>
+               Save Changes
+             </Button>
+            </>
+          ) : (
+            <Button variant="primary" onClick={handleEditToggle}>
+              Edit Profile
             </Button>
-            <Button variant="secondary" onClick={() => setProfileInfo({ ...profileInfo, ...{ name: '', email: '', phoneNumber: '', birthday: '', address: '', preferredCake: '', password: '', confirmPassword: '' } })}>
-              Cancel
-            </Button>
-          </Col>
-        </Form.Group>
+          )}
+        </div>
       </Form>
+
+      {/* Google Login */}
+      <div className="mt-4 text-center">
+        <GoogleLogin
+          onSuccess={handleGoogleLoginSuccess}
+          onFailure={handleGoogleLoginFailure}
+          style={{ marginTop: '20px' }}
+        />
+      </div>
     </Container>
   );
 };
