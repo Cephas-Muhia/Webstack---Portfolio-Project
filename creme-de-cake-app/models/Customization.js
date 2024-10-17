@@ -12,9 +12,12 @@ const customizationSchema = new mongoose.Schema({
   additionalDescription: { type: String, required: false }, // Optional additional description
   preferredColors: { type: String, required: false }, // Optional
   designImage: { type: String, required: false },  // Optional design
-  timestamps: true 
+  }, 
+  {timestamps: true 
   });
 
-const Customization = mongoose.model('Customization', customizationSchema);
-const mongoose = require('mongoose');
+
+
+module.exports = mongoose.model('Customization', customizationSchema);
+
 

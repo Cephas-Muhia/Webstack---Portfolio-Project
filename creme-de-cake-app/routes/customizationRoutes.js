@@ -1,5 +1,5 @@
 const express = require('express');
-const Customization = require('./models/Customization'); 
+const Customization = require('../models/Customization'); 
 const router = express.Router();
 
 // Route for submitting customizations

@@ -7,11 +7,12 @@ const authRoutes = require('./routes/authRoutes');
 const cakeRoutes = require('./routes/cakeRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
-const uploadRoutes = require('./routes/uploadRoutes'); 
-const customizationRoutes = require('./routes/customizationRoutes')
+const uploadRoutes = require('./routes/uploadRoutes');
+const customizationRoutes = require('./routes/customizationRoutes');
 const multer = require('multer');
 const bodyParser = require('body-parser');
 const Customization = require('./models/Customization');
+const authMiddleware = require('./middleware/authMiddleware'); // Adjusted import
 
 require('./config/passport')(passport); // Passport configuration
 
@@ -30,7 +31,6 @@ app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 
-
 // Serve static files from the frontend
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/dist')));
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/public')));
@@ -44,53 +44,52 @@ app.use('/api', uploadRoutes);
 app.use('/api', customizationRoutes);
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/creme_de_cake', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-    .then(() => {
-        console.log('MongoDB connected successfully!');
-        app.listen(PORT, () => {
-            console.log(`Server is running on http://localhost:${PORT}`);
-        });
-    })
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
+mongoose.connect('mongodb://localhost:27017/creme_de_cake')
+  .then(() => {
+    console.log('MongoDB connected successfully!');
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
     });
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
+
+
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Destination folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Destination folder
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    },
 });
 const upload = multer({ storage });
+
+// Route to test the middleware directly
+app.get('/test', authMiddleware, (req, res) => {
+    res.send(`Hello ${req.user.name}, you are authenticated!`);
+});
+
 // POST route for saving customizations
 app.post('/api/customizations', async (req, res) => {
-  try {
-    const customizationData = req.body; // Get the customization data from the request
-    const newCustomization = new Customization(customizationData);
-    await newCustomization.save();
-    res.status(201).json(newCustomization); // Respond with the created customization
-  } catch (error) {
-    res.status(400).json({ message: 'Error saving customization', error });
-  }
+    try {
+        const customizationData = req.body; // Get the customization data from the request
+        const newCustomization = new Customization(customizationData);
+        await newCustomization.save();
+        res.status(201).json(newCustomization); // Respond with the created customization
+    } catch (error) {
+        res.status(400).json({ message: 'Error saving customization', error });
+    }
 });
 
 // Handle file uploads separately if necessary
 app.post('/api/uploads', upload.single('designImage'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
-  }
-  res.status(200).json({ filePath: req.file.path }); // Return file path for the frontend
-});
-
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+    res.status(200).json({ filePath: req.file.path }); // Return file path for the frontend
 });
 
 // Handle frontend routing for a single-page application (SPA)

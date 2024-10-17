@@ -13,6 +13,7 @@
   "dependencies": {
     "@aws-sdk/credential-providers": "^3.665.0",
     "@mongodb-js/zstd": "^1.2.2",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cookie": "^0.7.1",
     "cors": "^2.8.5",
