@@ -33,31 +33,32 @@ function Catalogue() {
     { id: 24, name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
+      //Making the api call
   const handleCustomizeClick = async (cakeId, flavor) => {
     try {
-      // Create a new order in the backend using Axios
-      const response = await axios.post('http://localhost:5000/api/orders', {
-        flavor, // Send the flavor to the backend
-        user: 'user_id', // Replace this with the actual user's ID from authentication
-      });
+        // Prepare the data for the order (cakeId and flavor)
+        const orderPayload = {
+            cake: cakeId,  // Send the selected cake ID to the backend
+            flavor,        // The flavor selected by the user
+            user: 'user_id', // Replace with actual user ID after authentication implementation
+        };
 
-      const orderData = response.data;
+        // Send the POST request to the backend
+        const response = await axios.post('http://localhost:5000/api/orders', orderPayload);
 
-      // Prompt to save the flavor as preferredCakeFlavors
-      const savePreferred = window.confirm(`Do you want to save ${flavor} as a preferred flavor?`);
-      if (savePreferred) {
-        await axios.post('http://localhost:5000/api/users/preferred-flavors', {
-          flavor,
-          user: 'user_id', // Replace with actual user ID
-        });
-      }
+        // Handle successful response
+        const orderData = response.data;
+        console.log('Order created successfully:', orderData);
 
-      // Redirect to the Customize page with the newly created order ID
-      navigate(`/customize/${orderData.order._id}`);
+        // Navigate to the customization page using React Router's useNavigate.
+        navigate(`/customize/${orderData._id}`); // Corrected: use orderData directly
+
     } catch (error) {
-      console.error('Error creating order:', error);
+        // Show detailed error message
+        console.error('Error creating order:', error.response?.data || error.message);
     }
-  };
+};
+
 
   return (
     <div

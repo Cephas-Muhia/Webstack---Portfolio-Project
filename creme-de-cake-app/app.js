@@ -7,10 +7,12 @@ const authRoutes = require('./routes/authRoutes');
 const cakeRoutes = require('./routes/cakeRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
+const orderController = require('./controllers/orderController');
 const uploadRoutes = require('./routes/uploadRoutes');
 const customizationRoutes = require('./routes/customizationRoutes');
 const multer = require('multer');
 const bodyParser = require('body-parser');
+const Cake = require('./models/Cake');
 const Customization = require('./models/Customization');
 const authMiddleware = require('./middleware/authMiddleware'); // Adjusted import
 
@@ -42,6 +44,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', customizationRoutes);
+app.use('/api', orderRoutes);
+app.post('/api/orders', orderController.createOrder);
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/creme_de_cake')
@@ -71,6 +75,8 @@ const upload = multer({ storage });
 app.get('/test', authMiddleware, (req, res) => {
     res.send(`Hello ${req.user.name}, you are authenticated!`);
 });
+// order creation route and controller logic
+app.post('/api/orders', orderController.createOrder);
 
 // POST route for saving customizations
 app.post('/api/customizations', async (req, res) => {
