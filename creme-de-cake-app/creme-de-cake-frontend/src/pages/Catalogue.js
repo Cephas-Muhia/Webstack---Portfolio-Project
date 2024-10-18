@@ -1,20 +1,19 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Use useNavigate for navigation
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // Import Axios
 
 function Catalogue() {
-const Catalogue = () => {
   const [cakeId, setCakeId] = useState('');
   const [cakeFlavor, setCakeFlavor] = useState('');
   const [name, setName] = useState('');
-  
-const navigate = useNavigate(); // Initialize navigation hook
+
+  const navigate = useNavigate(); // Initialize navigation hook
 
   const cakes = [
-    { name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg' },
-    { name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg' },
-    { name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg' },
+    { id: 1, name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg', flavor: 'Marble' },
+    { id: 2, name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg', flavor: 'Vanilla' },
+    { id: 3, name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg', flavor: 'Orange' },
     { name: 'Banana Cake', description: 'A moist and soft cake made with ripe bananas and topped with creamy frosting.', imgUrl: '/images/banana-cake.jpg' },
     { name: 'Pinacolada Cake', description: 'Tropical cake made with pineapple and coconut, delivering a refreshing taste.', imgUrl: '/images/pinacolada-cake.jpg' },
     { name: 'Fruit Cake', description: 'A rich, dense cake loaded with dried fruits and nuts, often soaked in brandy or rum.', imgUrl: '/images/fruit-cake.jpg' },
@@ -38,92 +37,100 @@ const navigate = useNavigate(); // Initialize navigation hook
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
-const handleSelectCake = (selectedCake) => {
-    setCakeId(selectedCake._id);
+  const handleSelectCake = (selectedCake) => {
+    setCakeId(selectedCake.id);
     setCakeFlavor(selectedCake.flavor);
-    setCakeName(SelectCake.name);
-    
-  };  
+    setName(selectedCake.name);
 
- const handleSubmit = () => {
-    // Navigate to the Customize page with selected cake info
-    navigate(`/customize?cakeId=${cakeId}&cakeFlavor=${cakeFlavor}&name=${name}`);
+    // Navigate to Customize page with selected cake info
+    navigate(`/customize?cakeId=${selectedCake.id}&cakeFlavor=${selectedCake.flavor}&name=${selectedCake.name}`);
   };
 
-  const createOrder = async (orderData) => {
+  const handleSubmit = async (cake) => {
     try {
       // Prepare the data for the order
       const orderPayload = {
-        cake: orderData.name,        // Send the selected cake as a string
-        flavor: orderData.cakeFlavor, // The flavor selected by the user
-        user: 'user_id',   // Replace with the actual user ID after authentication implementation
+        cake: cake.name,
+        flavor: cake.flavor,
+        user: 'user_id', // Replace with the actual user ID
       };
+      
+     //Test if they are passed
+	    if (!cakeId || !cakeFlavor || !name) {
+    console.error('Required fields are missing');
+    return; // Ensure all required fields are available
+  }
 
-      // Send the POST request to the backend
-      const response = await axios.post('http://localhost:5000/api/orders', orderPayload);
+  const payload = {
+    cakeId,
+    flavor: cakeFlavor,
+    name,
+    user: 'user_id', // Add the user info here
+  };
 
-      // Handle successful response
+  try {
+    const response = await axios.post('http://localhost:5000/api/customization', payload);
+    console.log('Customization submitted successfully:', response.data);
+  } catch (error) {
+    console.error('Error submitting customization:', error);
+   }
+ };
+
+      // Navigate to the customization page after creating the order
       const createdOrder = response.data;
-      console.log('Order created successfully:', createdOrder);
-
-      // Navigate to the customization page using React Router's useNavigate
       navigate(`/customize/${createdOrder._id}`);
     } catch (error) {
-      // Show detailed error message
       console.error('Error creating order:', error.response?.data || error.message);
     }
   };
 
-return (
-  <div
-    className="d-flex flex-column justify-content-center align-items-center"
-    style={{
-      backgroundColor: '#f5e1a4', // Global background color
-      minHeight: '100vh', // Full height for the page
-      color: '#3e2c41', // Dark brown color for text
-      padding: '20px',
-    }}
-  >
-    <div className="container text-center">
-      {/* Title and description */}
-      <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland😊</h1>
-      <p className="lead mb-4">
-        Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
-      </p>
-    </div>
+  return (
+    <div
+      className="d-flex flex-column justify-content-center align-items-center"
+      style={{
+        backgroundColor: '#f5e1a4', // Global background color
+        minHeight: '100vh', // Full height for the page
+        color: '#3e2c41', // Dark brown color for text
+        padding: '20px',
+      }}
+    >
+      <div className="container text-center">
+        {/* Title and description */}
+        <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland 😊</h1>
+        <p className="lead mb-4">
+          Browse some of our amazing collection of cake flavors—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
+        </p>
+      </div>
 
-    {/* Cakes Grid */}
-    <div className="row mt-4">
-      {cakes.map((cake) => (
-        <div className="col-md-4 mb-4" key={cake._id || cake.id}> {/* Use cake._id or cake.id for uniqueness */}
-          <div className="card shadow" style={{ borderRadius: '10px' }}>
-            <img
-              src={cake.imgUrl}
-              className="card-img-top"
-              alt={cake.name}
-              style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
-            />
-            <div className="card-body text-center">
-              <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
-              <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
-              <button
-                className="btn btn-lg"
-                style={{ backgroundColor: '#3e2c41', color: 'white' }}
-                onClick={() => handleCustomize(cake)} // Pass cake details
-              >
-                Customize
-              </button>
+      {/* Cakes Grid */}
+      <div className="row mt-4">
+        {cakes.map((cake) => (
+          <div className="col-md-4 mb-4" key={cake.id}> {/* Use cake.id for uniqueness */}
+            <div className="card shadow" style={{ borderRadius: '10px' }}>
+              <img
+                src={cake.imgUrl}
+                className="card-img-top"
+                alt={cake.name}
+                style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
+              />
+              <div className="card-body text-center">
+                <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
+                <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
+                <button
+                  className="btn btn-lg"
+                  style={{ backgroundColor: '#3e2c41', color: 'white' }}
+                  onClick={() => handleSelectCake(cake)} // Correct handler
+                >
+                  Customize
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default Catalogue;
-    
-
-
 
