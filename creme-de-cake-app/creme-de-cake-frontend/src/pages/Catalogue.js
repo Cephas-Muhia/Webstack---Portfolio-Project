@@ -33,13 +33,23 @@ function Catalogue() {
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
-      // Making the api call
-    const handleCustomizeClick = async (name, CakeFlavor) => {
+  const handleCustomize = (cake) => {
+    // Navigate to the customization page with cakeId, CakeFlavor, and name
+    navigate('/customize', {
+      state: {
+        cakeId: cake._id,
+        cakeFlavor: cake.name, // Adjust this according to your data structure
+        name: cake.name // Adjust as needed
+      }
+    });
+  };
+
+  const createOrder = async (orderData) => {
     try {
       // Prepare the data for the order
       const orderPayload = {
-        cake: name,        // Send the selected cake as a string
-        flavor: CakeFlavor, // The flavor selected by the user
+        cake: orderData.name,        // Send the selected cake as a string
+        flavor: orderData.cakeFlavor, // The flavor selected by the user
         user: 'user_id',   // Replace with the actual user ID after authentication implementation
       };
 
@@ -47,65 +57,67 @@ function Catalogue() {
       const response = await axios.post('http://localhost:5000/api/orders', orderPayload);
 
       // Handle successful response
-      const orderData = response.data;
-      console.log('Order created successfully:', orderData);
+      const createdOrder = response.data;
+      console.log('Order created successfully:', createdOrder);
 
       // Navigate to the customization page using React Router's useNavigate
-      navigate(`/customize/${orderData._id}`);
+      navigate(`/customize/${createdOrder._id}`);
     } catch (error) {
       // Show detailed error message
       console.error('Error creating order:', error.response?.data || error.message);
     }
   };
 
+return (
+  <div
+    className="d-flex flex-column justify-content-center align-items-center"
+    style={{
+      backgroundColor: '#f5e1a4', // Global background color
+      minHeight: '100vh', // Full height for the page
+      color: '#3e2c41', // Dark brown color for text
+      padding: '20px',
+    }}
+  >
+    <div className="container text-center">
+      {/* Title and description */}
+      <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland😊</h1>
+      <p className="lead mb-4">
+        Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
+      </p>
+    </div>
 
-  return (
-    <div
-      className="d-flex flex-column justify-content-center align-items-center"
-      style={{
-        backgroundColor: '#f5e1a4', // Global background color
-        minHeight: '100vh', // Full height for the page
-        color: '#3e2c41', // Dark brown color for text
-        padding: '20px',
-      }}
-    >
-      <div className="container text-center">
-        {/* Title and description */}
-        <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland😊</h1>
-        <p className="lead mb-4">
-          Browse some of our amazing collection of cake flavours—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
-        </p>
-      </div>
-
-      {/* Cakes Grid */}
-        <div className="row mt-4">
-        {cakes.map((cake) => (
+    {/* Cakes Grid */}
+    <div className="row mt-4">
+      {cakes.map((cake) => (
         <div className="col-md-4 mb-4" key={cake._id || cake.id}> {/* Use cake._id or cake.id for uniqueness */}
-            <div className="card shadow" style={{ borderRadius: '10px' }}>
-             <img
-             src={cake.imgUrl}
+          <div className="card shadow" style={{ borderRadius: '10px' }}>
+            <img
+              src={cake.imgUrl}
               className="card-img-top"
-          alt={cake.name}
-          style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
-           />
-              <div className="card-body text-center">
-               <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
-                 <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
-                <button
-                   className="btn btn-lg"
-                 style={{ backgroundColor: '#3e2c41', color: 'white' }}
-                     onClick={() => handleCustomizeClick(cake.id, cake.name)} // Pass cake details
-                     >
-                  Customize
-                </button>
-              </div>
+              alt={cake.name}
+              style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
+            />
+            <div className="card-body text-center">
+              <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
+              <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
+              <button
+                className="btn btn-lg"
+                style={{ backgroundColor: '#3e2c41', color: 'white' }}
+                onClick={() => handleCustomize(cake)} // Pass cake details
+              >
+                Customize
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
 }
 
 export default Catalogue;
+    
+
+
 

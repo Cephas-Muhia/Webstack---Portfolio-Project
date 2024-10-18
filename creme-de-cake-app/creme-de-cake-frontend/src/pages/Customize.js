@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios
 
@@ -8,26 +8,26 @@ function Customize() {
 
   // Form state to handle customization inputs
   const [formData, setFormData] = useState({
-    cakeId: '', // Add this field for cake ID
+    cakeId: '',
     name: '',
-    CakeFlavor: '', // Updated to a string since it's required as a single flavor
+    CakeFlavor: '',
     customFlavor: '',
-    sizeInKgs: 1, // Default to 1 kg
-    decorations: [], // Assuming this will be an array of strings
+    sizeInKgs: 1,
+    decorations: [],
     icingType: 'Soft icing',
     shape: 'Round',
-    celebrationExtras: [], // Assuming this will be an array of strings
+    celebrationExtras: [],
     message: '',
     additionalDescription: '',
-    preferredColors: '', // Updated to a string as per the schema requirement
-    designImage: ''
+    preferredColors: '',
+    designImage: '',
   });
 
   const [flavors, setFlavors] = useState([]); // To handle multiple flavors
   const [colors, setColors] = useState([]); // To handle multiple colors
   const [cakeData, setCakeData] = useState(null); // To store fetched cake data
 
-    // Fetch cake data when component mounts or orderId changes
+  // Fetch cake data when component mounts or orderId changes
   useEffect(() => {
     const fetchCakeData = async () => {
       try {
@@ -36,19 +36,19 @@ function Customize() {
 
         // Populate form data with fetched cake data
         setFormData({
-          cakeId: cake._id, // Set cakeId from fetched data
-          name: cake.name || '', // Ensure name is filled
-          CakeFlavor: cake.flavor || '', // Assuming a single flavor is stored
-          customFlavor: '', // Reset custom flavor
+          cakeId: cake._id,
+          name: cake.name || '',
+          CakeFlavor: cake.flavor || '',
+          customFlavor: '',
           sizeInKgs: cake.sizeInKgs || 1,
-          decorations: cake.decorations || [], // Set decorations
+          decorations: cake.decorations || [],
           icingType: cake.icingType || 'Soft icing',
           shape: cake.shape || 'Round',
           celebrationExtras: cake.celebrationExtras || [],
           message: cake.message || '',
           additionalDescription: cake.additionalDescription || '',
-          preferredColors: cake.preferredColors || '', // Adjusted to a string
-          designImage: cake.designImage || ''
+          preferredColors: cake.preferredColors || '',
+          designImage: cake.designImage || '',
         });
 
         setCakeData(cake); // Store cake data
@@ -65,31 +65,31 @@ function Customize() {
   // Handle input change for form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
   // Handle flavor selection with a limit of 3
   const handleFlavorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
+    const options = Array.from(e.target.selectedOptions, (option) => option.value);
     if (options.length <= 3) {
       setFlavors(options);
-      setFormData({ ...formData, flavors: options });
+      setFormData((prevData) => ({ ...prevData, flavors: options }));
     }
   };
 
   // Handle custom flavor input
   const handleCustomFlavorChange = (e) => {
-    setFormData({ ...formData, customFlavor: e.target.value });
+    setFormData((prevData) => ({ ...prevData, customFlavor: e.target.value }));
   };
 
   // Handle cake color selection
   const handleColorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
+    const options = Array.from(e.target.selectedOptions, (option) => option.value);
     setColors(options);
-    setFormData({ ...formData, preferredColors: options.join(', ') }); // Join array to string for preferredColors
+    setFormData((prevData) => ({ ...prevData, preferredColors: options.join(', ') }));
   };
 
   // Handle decoration selection
@@ -98,66 +98,62 @@ function Customize() {
     const updatedDecorations = checked
       ? [...formData.decorations, value]
       : formData.decorations.filter((decoration) => decoration !== value);
-    setFormData({ ...formData, decorations: updatedDecorations });
+    setFormData((prevData) => ({ ...prevData, decorations: updatedDecorations }));
   };
 
   // Handle file upload for the cake design image
   const handleFileUpload = async (e) => {
-  const file = e.target.files[0];
-  const formData = new FormData();
-  formData.append('designImage', file);
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('designImage', file);
 
-  try {
-    const response = await axios.post('http://localhost:5000/api/uploads', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    console.log('File uploaded successfully', response.data);
-  } catch (error) {
-    console.error('Error uploading file:', error);
-  }
-};
+    try {
+      const response = await axios.post('http://localhost:5000/api/uploads', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('File uploaded successfully', response.data);
+      setFormData((prevData) => ({ ...prevData, designImage: response.data.filePath }));
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
 
+  // Submit the customization to the backend
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-   // Submit the customization to the backend
-     const handleSubmit = async (e) => {
-  e.preventDefault();
+    const customizationData = {
+      name: formData.name,
+      flavor: formData.CakeFlavor || formData.customFlavor,
+      sizeInKgs: formData.sizeInKgs,
+      shape: formData.shape,
+      icingType: formData.icingType,
+      decorations: formData.decorations,
+      message: formData.message,
+      additionalDescription: formData.additionalDescription,
+      preferredColors: formData.preferredColors,
+      designImage: formData.designImage,
+    };
 
-  const customizationData = {
-  name: order?.name || '',  // Use optional chaining to avoid errors if order is undefined
-  flavor: selectedFlavor,  // Selected flavor or custom flavor
-  customFlavor: customFlavor || '',  // User's custom flavor (optional)
-  sizeInKgs: cakeSize,  // Size of the cake in kg
-  shape: selectedShape,  // Cake shape (Square, Round, etc.)
-  icingType: selectedIcing,  // Selected icing type (e.g. 'Hard icing', 'Soft icing', 'Fresh cream')
-  decorations: selectedDecorations,  // Selected decorations or extras
-  message: customMessage || '',  // Custom cake message
-  additionalDescription: additionalDescription || '',  // Additional customization description (optional)
-  preferredColors: selectedColors,  // Colors selected for the cake decoration
-  designImage: uploadedImage || '',  // Reference to the uploaded image for the cake design
-};
+    try {
+      const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
+      console.log("Order created successfully:", response.data.order);
 
-try {
-  const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-  console.log("Order created successfully:", response.data.order);
-
-  // Assuming response.data.order contains the order ID
-  const orderId = response.data.order._id; // Adjust this based on your API response
-
-  // Redirect to Cart page with order ID
-  navigate(`/cart/${orderId}`);
-} catch (error) {
-  console.error("Error in order creation:", error);
-}
-
+      const newOrderId = response.data.order._id; // Adjust this based on your API response
+      navigate(`/cart/${newOrderId}`);
+    } catch (error) {
+      console.error("Error in order creation:", error);
+    }
+  };
 
   // Reset the form fields
   const handleReset = () => {
     setFormData({
-      cakeId: '', 
+      cakeId: '',
       name: '',
-      CakeFlavor: '', 
+      CakeFlavor: '',
       customFlavor: '',
       sizeInKgs: 1,
       decorations: [],
@@ -167,7 +163,7 @@ try {
       message: '',
       additionalDescription: '',
       preferredColors: '',
-      designImage: ''
+      designImage: '',
     });
     setFlavors([]);
     setColors([]);
@@ -225,9 +221,7 @@ try {
           <option value="Lemon">Lemon</option>
         </select>
         <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple flavors.</small>
-        {flavors.length >= 3 && (
-          <p className="text-warning">You can only select up to 3 flavors.</p>
-        )}
+        {flavors.length >= 3 && <p className="text-warning">You can only select up to 3 flavors.</p>}
         <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
         <input
           type="text"
@@ -235,11 +229,11 @@ try {
           placeholder="Enter custom flavor"
           value={formData.customFlavor}
           onChange={handleCustomFlavorChange}
-          style={{ borderColor: '#ff6347', color: '#ff6347' }}
+          style={{ borderColor: '#ff6347', borderWidth: '2px' }}
         />
       </div>
 
-      {/* Cake Shape */}
+      {/* Cake Shape Selection */}
       <div className="mb-4">
         <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Shape</label>
         <select
@@ -250,83 +244,79 @@ try {
         >
           <option value="Round">Round</option>
           <option value="Square">Square</option>
-          <option value="Heart">Heart</option>
           <option value="Stacked">Stacked</option>
+          <option value="HeartShape">Heart</option>
         </select>
       </div>
 
       {/* Decoration Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Choose Celebration Extra's</label>
-        <div className="d-flex flex-wrap justify-content-between">
+        <label className="form-label" style={{ color: '#3e2c41' }}>Select Decorations</label>
+        <div>
           {['Sprinkles', 'Flowers', 'Candles', 'Edible Glitter'].map((decoration) => (
-            <div className="form-check" key={decoration}>
+            <div key={decoration}>
               <input
                 type="checkbox"
                 value={decoration}
                 onChange={handleDecorationChange}
-                className="form-check-input"
               />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>{decoration}</label>
+              <label className="ms-2" style={{ color: '#3e2c41' }}>{decoration}</label>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Cake Color Selection */}
+      {/* Color Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Select Your Preferred Cake Colors</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Colors</label>
         <select multiple className="form-select" value={colors} onChange={handleColorChange}>
-          {['Red', 'Blue', 'Green', 'Yellow', 'Pink', 'Purple', 'Orange', 'Black', 'White'].map((color) => (
-            <option key={color} value={color}>{color}</option>
-          ))}
+          <option value="Red">Red</option>
+          <option value="Blue">Blue</option>
+          <option value="Green">Green</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Purple">Purple</option>
+          <option value="Pink">Pink</option>
         </select>
         <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
       </div>
 
-      {/* Custom Cake Message */}
+      {/* Custom Message and Additional Description */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>What Message Would You Like to See on Your Cake? 📝</label>
-        <input
-          type="text"
+        <label className="form-label" style={{ color: '#3e2c41' }}>Custom Message</label>
+        <textarea
           className="form-control"
           name="message"
           value={formData.message}
           onChange={handleChange}
-          placeholder="E.g., 'Happy Birthday!', 'I love you Sweeriee', 'Congratulation'"
+          rows="3"
         />
       </div>
 
-      {/* Additional Description */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Provide additional details on how you envision your cake to be crafted.</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Additional Description</label>
         <textarea
           className="form-control"
-          name="AdditionalDescription"
-          value={formData.AdditionalDescription}
+          name="additionalDescription"
+          value={formData.additionalDescription}
           onChange={handleChange}
-          placeholder="Provide extra details for your cake..."
+          rows="3"
         />
       </div>
 
-      {/* File Upload for Cake Design */}
+      {/* Design Image Upload */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Upload a Picture of how you envision your cake to look like</label>
-        <input
-          type="file"
-          className="form-control"
-          accept="image/*"
-          onChange={handleFileUpload}
-          placeholder="upload an image of your cake design here!"
-        />
+        <label className="form-label" style={{ color: '#3e2c41' }}>Upload Your Design Image</label>
+        <input type="file" className="form-control" onChange={handleFileUpload} />
       </div>
 
-      <div className="d-flex justify-content-between mt-5">
-        <button className="btn btn-secondary" onClick={handleReset}>Reset Customization</button>
-        <button className="btn btn-success" onClick={handleSubmit}>Submit Customized Cake</button>
+      {/* Form Buttons */}
+      <div className="d-flex justify-content-between">
+        <button type="button" className="btn btn-warning" onClick={handleReset}>Reset Customization</button>
+        <button type="submit" className="btn btn-success" onClick={handleSubmit}>Submit Customized Cake</button>
       </div>
     </div>
   );
 }
 
 export default Customize;
+
