@@ -33,9 +33,14 @@ app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 
+// Handle any requests that don't match one of the above
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'creme-de-cake-frontend/build', 'index.html'));
+});
+
 // Serve static files from the frontend
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/dist')));
-app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/public')));
+app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/build')));
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -62,14 +67,37 @@ mongoose.connect('mongodb://localhost:27017/creme_de_cake')
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Destination folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-    },
+  destination: function (req, file, cb) {
+    cb(null, './uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+  }
 });
-const upload = multer({ storage });
+
+const upload = multer({ storage: storage });
+
+app.post('/api/uploads', upload.single('designImage'), (req, res, next) => {
+  res.status(201).json({
+    message: 'File uploaded successfully!',
+    file: req.file
+  });
+});
+
+
+//converts the cakeId into an ObjectId before processing the order
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { cake, flavor, user } = req.body;
+
+    // Proceed with order creation using the cakeId, flavor, user, etc.
+    const order = await Order.create({ cake: cakeId, flavor, user });
+    
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(400).json({ error: 'Error creating order' });
+  }
+});
 
 // Route to test the middleware directly
 app.get('/test', authMiddleware, (req, res) => {

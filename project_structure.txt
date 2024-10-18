@@ -1,0 +1,37 @@
+.
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── HEAD
+│   ├── branches
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   ├── index
+│   ├── info
+│   ├── logs
+│   ├── objects
+│   ├── packed-refs
+│   └── refs
+├── README.md
+├── creme-de-cake-app
+│   ├── .env
+│   ├── app.js
+│   ├── cake-env
+│   ├── config
+│   ├── controllers
+│   ├── creme-de-cake-frontend
+│   ├── db.js
+│   ├── middleware
+│   ├── models
+│   ├── mongod.conf
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── populate.js
+│   ├── public
+│   ├── routes
+│   ├── services
+│   └── uploads
+└── project_structure.txt
+
+19 directories, 15 files

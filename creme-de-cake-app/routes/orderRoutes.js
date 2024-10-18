@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Order = require('../models/Order');
-const Cake = require('../models/Cake'); 
+const { createOrder } = require('../controllers/orderController');
+const authMiddleware = require('../middleware/authMiddleware'); // Protect middleware
 
-const { createOrder } = require('../controllers/orderController'); 
-const protect = require('../middleware/authMiddleware'); //path is correct
-
-// Public route for creating orders (no authentication required)
+//Public  Route to create an order (protected by authMiddleware)
 router.post('/orders', createOrder);
 
 // Route to create an order
@@ -14,39 +11,28 @@ router.post('/orders', createOrder);
 
  //Receiving api calls from Catalogue page.
 router.post('/orders', async (req, res) => {
-    try {
-        const { cake, flavor, user } = req.body;
+  try {
+    const { name, CakeFlavor, user } = req.body;  // Destructure data from the request body
 
-        // Log incoming data
-        console.log('Incoming order data:', req.body);
+    // Create a new order with the provided details
+    const newOrder = new Order({
+      name: cakename,             // Cake name
+      CakeFlavor: flavor,         // Selected flavor
+      user: user,             // Placeholder for actual user ID
+      // Optionally add more fields here if needed, like order date, etc.
+    });
 
-        // Check for required fields
-        if (!cake || !flavor || !user) {
-            return res.status(400).json({ message: 'Missing required fields: cake, flavor, or user' });
-        }
+    // Save the new order to the database
+    const savedOrder = await newOrder.save();
 
-        // Create a new order instance
-        const newOrder = new Order({
-            cake,
-            user,
-            customization: null,  // Assuming customization happens later
-            totalPrice: null,      // Will be calculated later
-        });
-
-        // Save the order
-        await newOrder.save();
-
-        // Log success message
-        console.log('Order saved successfully:', newOrder);
-
-        // Send the new order back
-        res.status(201).json(newOrder);
-    } catch (error) {
-        console.error('Error creating order:', error);  // Log the full error
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
+    // Respond with the saved order, including its generated _id
+    res.status(201).json(savedOrder);
+  } catch (error) {
+    // Handle errors and respond with an error message
+    console.error('Error creating order:', error.message);
+    res.status(500).json({ message: 'Failed to create order', error: error.message });
+  }
 });
-
 
 
 module.exports = router; 

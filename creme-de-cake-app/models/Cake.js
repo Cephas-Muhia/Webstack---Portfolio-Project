@@ -1,74 +1,83 @@
 const mongoose = require('mongoose');
 
-// Define cake flavors with their respective prices
+// Define cake flavors with their respective categories and prices
 const cakeData = {
-    // Standard Cakes
-    "Vanilla Cake": 600,
-    "Banana Cake": 650,
-    "Orange Cake": 650,
-    "Lemon Cake": 700,
-    "Pineapple Cake": 750,
-    "Butter Cake": 700,
-    "Cinnamon Cake": 700,
-    "Coconut Cake": 750,
-    "Mango Cake": 750,
-    "Raisin Cake": 750,
+    "Vanilla Cake": { price: 600, category: "Standard" },
+    "Banana Cake": { price: 650, category: "Standard" },
+    "Orange Cake": { price: 650, category: "Standard" },
+    "Lemon Cake": { price: 700, category: "Standard" },
+    "Pineapple Cake": { price: 750, category: "Standard" },
+    "Butter Cake": { price: 700, category: "Standard" },
+    "Cinnamon Cake": { price: 700, category: "Standard" },
+    "Coconut Cake": { price: 750, category: "Standard" },
+    "Mango Cake": { price: 750, category: "Standard" },
+    "Raisin Cake": { price: 750, category: "Standard" },
     // Premium Cakes
-    "Marble Cake": 800,
-    "Red Velvet Cake": 900,
-    "Chocolate Cake": 900,
-    "Strawberry Cake": 950,
-    "White Forest Cake": 1000,
-    "Black Forest Cake": 1000,
-    "Butterscotch Cake": 950,
-    "Peach Cake": 950,
-    "Apple Cinnamon Cake": 900,
-    "Almond Cake": 1000,
+    "Marble Cake": { price: 800, category: "Premium" },
+    "Red Velvet Cake": { price: 900, category: "Premium" },
+    "Chocolate Cake": { price: 900, category: "Premium" },
+    "Strawberry Cake": { price: 950, category: "Premium" },
+    "White Forest Cake": { price: 1000, category: "Premium" },
+    "Black Forest Cake": { price: 1000, category: "Premium" },
+    "Butterscotch Cake": { price: 950, category: "Premium" },
+    "Peach Cake": { price: 950, category: "Premium" },
+    "Apple Cinnamon Cake": { price: 900, category: "Premium" },
+    "Almond Cake": { price: 1000, category: "Premium" },
     // Specialty Cakes
-    "Fruit Cake": 1200,
-    "Blueberry Cake": 1300,
-    "Amarula Cake": 1400,
-    "Coconut Rum Cake": 1450,
-    "Coffee Cake": 1500,
-    "Hazelnut Cake": 1400,
-    "Tiramisu Cake": 1500,
-    "Mint Chocolate Cake": 1350,
-    "Baileys Cake": 1450,
-    "Passion Fruit Cake": 1300,
+    "Fruit Cake": { price: 1200, category: "Specialty" },
+    "Blueberry Cake": { price: 1300, category: "Specialty" },
+    "Amarula Cake": { price: 1400, category: "Specialty" },
+    "Coconut Rum Cake": { price: 1450, category: "Specialty" },
+    "Coffee Cake": { price: 1500, category: "Specialty" },
+    "Hazelnut Cake": { price: 1400, category: "Specialty" },
+    "Tiramisu Cake": { price: 1500, category: "Specialty" },
+    "Mint Chocolate Cake": { price: 1350, category: "Specialty" },
+    "Baileys Cake": { price: 1450, category: "Specialty" },
+    "Passion Fruit Cake": { price: 1300, category: "Specialty" },
     // Deluxe Cakes
-    "Cheesecake": 1600,
-    "Pinacolada Cake": 1700,
-    "Carrot Cake": 1800,
-    "Eggless Cake": 1900,
-    "Blueberry Cheesecake": 2000,
-    "Mango Cheesecake": 1900,
-    "Blackcurrant Cheesecake": 2000,
-    "Salted Caramel Cake": 1800,
-    "Chocolate Truffle Cake": 1900,
-    "Peanut Butter Cake": 1850
+    "Cheesecake": { price: 1600, category: "Deluxe" },
+    "Pinacolada Cake": { price: 1700, category: "Deluxe" },
+    "Carrot Cake": { price: 1800, category: "Deluxe" },
+    "Eggless Cake": { price: 1900, category: "Deluxe" },
+    "Blueberry Cheesecake": { price: 2000, category: "Deluxe" },
+    "Mango Cheesecake": { price: 1900, category: "Deluxe" },
+    "Blackcurrant Cheesecake": { price: 2000, category: "Deluxe" },
+    "Salted Caramel Cake": { price: 1800, category: "Deluxe" },
+    "Chocolate Truffle Cake": { price: 1900, category: "Deluxe" },
+    "Peanut Butter Cake": { price: 1850, category: "Deluxe" }
 };
 
 // Cake schema
 const cakeSchema = new mongoose.Schema({
-    CakeFlavor: { type: [String], required: true },  // Multiple flavors can be selected
+    name: { type: String , required: true }, 
+    CakeFlavor: { type: [String], required: true, enum: Object.keys(cakeData) },  // Allow multiple flavors
     image: { type: String },  // Image URL or path
     availability: { type: Boolean, default: true },  // Availability status
 });
 
 // Virtual field to calculate the final price based on selected flavors and weight (kgs)
-cakeSchema.virtual('calculatePrice').get(function(numOfKgs) {
+cakeSchema.virtual('calculatePrice').get(function() {
     let highestPrice = 0;
 
     // Iterate over selected flavors and find the highest price
     this.CakeFlavor.forEach(flavor => {
-        if (cakeData[flavor] > highestPrice) {
-            highestPrice = cakeData[flavor];
+        if (cakeData[flavor]?.price > highestPrice) {
+            highestPrice = cakeData[flavor].price;
         }
     });
 
-    // Multiply the highest flavor price by the number of kilograms
-    return highestPrice * numOfKgs;
+    return highestPrice; // Return the highest price
 });
+
+// Method to get the final price based on weight
+cakeSchema.methods.getFinalPrice = function(numOfKgs) {
+    return this.calculatePrice * numOfKgs; // Multiply highest price by number of kgs
+};
+
+// Method to get the category of the selected flavor
+cakeSchema.methods.getCategory = function() {
+    return this.CakeFlavor.map(flavor => cakeData[flavor]?.category || 'Unknown'); // Return categories for all flavors
+};
 
 const Cake = mongoose.model('Cake', cakeSchema);
 module.exports = Cake;

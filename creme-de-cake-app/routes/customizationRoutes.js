@@ -2,19 +2,42 @@ const express = require('express');
 const Customization = require('../models/Customization'); 
 const router = express.Router();
 
-// Route for submitting customizations
 
-router.post('/customizations', async (req, res) => {
+// POST route for customization
+router.post('/customization', async (req, res) => {
   try {
-    const customizationData = new Customization(req.body); // Create a new customization document
-    await customizationData.save(); // Save to the database
-    res.status(201).json({ message: 'Customization saved successfully!', data: customizationData });
+    const { cakeId, flavor, name, sizeInKgs, decorations, icingType, shape, celebrationExtras, message, additionalDescription, preferredColors, designImage } = req.body;
+
+    // Validate required fields
+    if (!cakeId || !flavor || !name) {
+      return res.status(400).json({ message: 'Cake ID, flavor, and name are required.' });
+    }
+
+    // Create a new customization object
+    const newCustomization = new Customization({
+      cakeId,
+      CakeFlavor,
+      name,
+      sizeInKgs,
+      decorations,
+      icingType,
+      shape,
+      celebrationExtras,
+      message,
+      additionalDescription,
+      preferredColors,
+      designImage
+    });
+
+    // Save the customization to the database
+    await newCustomization.save();
+
+    res.status(201).json({ message: 'Customization saved successfully', customization: newCustomization });
   } catch (error) {
-    console.error('Error saving customization:', error);
-    res.status(500).json({ message: 'Error saving customization.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Server error while saving customization', error: error.message });
   }
 });
-
 
 // Fetch all customizations
 router.get('/', async (req, res) => {

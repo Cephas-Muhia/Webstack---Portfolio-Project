@@ -268,7 +268,7 @@ function Customize() {
 
       {/* Color Selection */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Colors</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Select your preferred cake color/colors</label>
         <select multiple className="form-select" value={colors} onChange={handleColorChange}>
           <option value="Red">Red</option>
           <option value="Blue">Blue</option>
@@ -282,7 +282,7 @@ function Customize() {
 
       {/* Custom Message and Additional Description */}
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Custom Message</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Add a </label>
         <textarea
           className="form-control"
           name="message"
@@ -293,7 +293,7 @@ function Customize() {
       </div>
 
       <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Additional Description</label>
+        <label className="form-label" style={{ color: '#3e2c41' }}>Provide additional details on how you envision your cake to be crafted.</label>
         <textarea
           className="form-control"
           name="additionalDescription"
@@ -304,8 +304,8 @@ function Customize() {
       </div>
 
       {/* Design Image Upload */}
-      <div className="mb-4">
-        <label className="form-label" style={{ color: '#3e2c41' }}>Upload Your Design Image</label>
+      <div className="mb
+        <label className="form-label" style={{ color: '#3e2c41' }}>upload an image of your proposed cake design here!</label>
         <input type="file" className="form-control" onChange={handleFileUpload} />
       </div>
 

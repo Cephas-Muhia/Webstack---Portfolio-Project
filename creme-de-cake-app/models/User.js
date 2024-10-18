@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   phoneNumber: String,
   password: { type: String, required: true },
-  preferredCakeFlavors: [String],
+  preferredCakeFlavor: [String],
   profilePicture: String,
   accountCreationDate: { type: Date, default: Date.now },
 });
