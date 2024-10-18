@@ -14,7 +14,7 @@ function Catalogue() {
     { id: 1, name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg', flavor: 'Marble' },
     { id: 2, name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg', flavor: 'Vanilla' },
     { id: 3, name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg', flavor: 'Orange' },
-    { name: 'Banana Cake', description: 'A moist and soft cake made with ripe bananas and topped with creamy frosting.', imgUrl: '/images/banana-cake.jpg' },
+     { name: 'Banana Cake', description: 'A moist and soft cake made with ripe bananas and topped with creamy frosting.', imgUrl: '/images/banana-cake.jpg' },
     { name: 'Pinacolada Cake', description: 'Tropical cake made with pineapple and coconut, delivering a refreshing taste.', imgUrl: '/images/pinacolada-cake.jpg' },
     { name: 'Fruit Cake', description: 'A rich, dense cake loaded with dried fruits and nuts, often soaked in brandy or rum.', imgUrl: '/images/fruit-cake.jpg' },
     { name: 'Lemon Cake', description: 'Tangy and refreshing cake infused with lemon juice and zest.', imgUrl: '/images/lemon-cake.jpg' },
@@ -39,52 +39,40 @@ function Catalogue() {
 
   const handleSelectCake = (selectedCake) => {
     setCakeId(selectedCake.id);
-    setCakeFlavor(selectedCake.flavor);
+    setCakeFlavor(selectedCake.CakeFlavor);
     setName(selectedCake.name);
 
     // Navigate to Customize page with selected cake info
     navigate(`/customize?cakeId=${selectedCake.id}&cakeFlavor=${selectedCake.flavor}&name=${selectedCake.name}`);
   };
 
-  const handleSubmit = async (cake) => {
+  const handleSubmit = async () => {
+    // Ensure all required fields are available
+    if (!cakeId || !cakeFlavor || !name) {
+      console.error('Required fields are missing');
+      return;
+    }
+
+    const payload = {
+      cakeId,
+      flavor: cakeFlavor,
+      name,
+      user: 'user_id', 
+    };
+
     try {
-      // Prepare the data for the order
-      const orderPayload = {
-        cake: cake.name,
-        flavor: cake.flavor,
-        user: 'user_id', // Replace with the actual user ID
-      };
-      
-     //Test if they are passed
-	    if (!cakeId || !cakeFlavor || !name) {
-    console.error('Required fields are missing');
-    return; // Ensure all required fields are available
-  }
+      const response = await axios.post('http://localhost:5000/api/customization', payload);
+      console.log('Customization submitted successfully:', response.data);
 
-  const payload = {
-    cakeId,
-    flavor: cakeFlavor,
-    name,
-    user: 'user_id', // Add the user info here
-  };
-
-  try {
-    const response = await axios.post('http://localhost:5000/api/customization', payload);
-    console.log('Customization submitted successfully:', response.data);
-  } catch (error) {
-    console.error('Error submitting customization:', error);
-   }
- };
-
-      // Navigate to the customization page after creating the order
+      // Navigate to the customization page after successful submission
       const createdOrder = response.data;
       navigate(`/customize/${createdOrder._id}`);
     } catch (error) {
-      console.error('Error creating order:', error.response?.data || error.message);
+      console.error('Error submitting customization:', error.response?.data || error.message);
     }
   };
 
-  return (
+     return (
     <div
       className="d-flex flex-column justify-content-center align-items-center"
       style={{
@@ -95,17 +83,15 @@ function Catalogue() {
       }}
     >
       <div className="container text-center">
-        {/* Title and description */}
         <h1 className="display-4 font-weight-bold mb-3">Flavor Wonderland 😊</h1>
         <p className="lead mb-4">
-          Browse some of our amazing collection of cake flavors—though not all we can offer! Dive into a world of sweetness and find your favorite treat!
+          Browse our amazing collection of cake flavors and find your favorite treat!
         </p>
       </div>
 
-      {/* Cakes Grid */}
       <div className="row mt-4">
         {cakes.map((cake) => (
-          <div className="col-md-4 mb-4" key={cake.id}> {/* Use cake.id for uniqueness */}
+          <div className="col-md-4 mb-4" key={cake.id}> {/* Ensure cake.id is unique */}
             <div className="card shadow" style={{ borderRadius: '10px' }}>
               <img
                 src={cake.imgUrl}
@@ -114,12 +100,12 @@ function Catalogue() {
                 style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
               />
               <div className="card-body text-center">
-                <h5 className="card-title mb-2">{cake.name}</h5> {/* Cake name displayed under image */}
-                <p className="card-text mb-4">{cake.description}</p> {/* Cake description */}
+                <h5 className="card-title mb-2">{cake.name}</h5>
+                <p className="card-text mb-4">{cake.description}</p>
                 <button
                   className="btn btn-lg"
                   style={{ backgroundColor: '#3e2c41', color: 'white' }}
-                  onClick={() => handleSelectCake(cake)} // Correct handler
+                  onClick={() => handleSelectCake(cake)} // Set selected cake details
                 >
                   Customize
                 </button>
@@ -128,9 +114,15 @@ function Catalogue() {
           </div>
         ))}
       </div>
+
+      <button
+        className="btn btn-primary mt-4"
+        onClick={handleSubmit} // Trigger the submit when clicked
+      >
+        Submit Customization
+      </button>
     </div>
   );
 }
 
 export default Catalogue;
-
