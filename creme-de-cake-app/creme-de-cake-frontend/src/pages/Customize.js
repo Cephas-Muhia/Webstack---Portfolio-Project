@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios
 
@@ -8,21 +8,90 @@ function Customize() {
 
   // Form state to handle customization inputs
   const [formData, setFormData] = useState({
-    flavor: [],
+    cakeId: '', // Add this field for cake ID
+    name: '',
+    CakeFlavor: '', // Updated to a string since it's required as a single flavor
     customFlavor: '',
     sizeInKgs: 1, // Default to 1 kg
-    decorations: [],
+    decorations: [], // Assuming this will be an array of strings
     icingType: 'Soft icing',
     shape: 'Round',
-    celebrationExtras: [], // Note the correct casing
+    celebrationExtras: [], // Assuming this will be an array of strings
     message: '',
-    additionalDescription: '', // Note the correct casing
-    preferredColors: [],
+    additionalDescription: '',
+    preferredColors: '', // Updated to a string as per the schema requirement
     designImage: ''
   });
 
   const [flavors, setFlavors] = useState([]); // To handle multiple flavors
   const [colors, setColors] = useState([]); // To handle multiple colors
+  const [cakeData, setCakeData] = useState(null); // To store fetched cake data
+
+  // Fetch cake data when component mounts or orderId changes
+  useEffect(() => {
+    const fetchCakeData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
+        const cake = response.data;
+
+        // Populate form data with fetched cake data
+        setFormData({
+          cakeId: cake._id, // Set cakeId from fetched data
+          name: cake.name || '', // Ensure name is filled
+          CakeFlavor: cake.flavor || '', // Assuming a single flavor is stored
+          customFlavor: '', // Reset custom flavor
+          sizeInKgs: cake.sizeInKgs || 1,
+          decorations: cake.decorations || [], // Set decorations
+          icingType: cake.icingType || 'Soft icing',
+          shape: cake.shape || 'Round',
+          celebrationExtras: cake.celebrationExtras || [],
+          message: cake.message || '',
+          additionalDescription: cake.additionalDescription || '',
+          preferredColors: cake.preferredColors || '', // Adjusted to a string
+          designImage: cake.designImage || ''
+        });
+
+        setCakeData(cake); // Store cake data
+      } catch (error) {
+        console.error('Error fetching cake data:', error);
+      }
+    };
+
+    if (orderId) {
+      fetchCakeData();
+    }
+  }, [orderId]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:5000/api/customizations', formData);
+      console.log('Customization created:', response.data);
+      navigate('/somewhere'); // Redirect after successful submission
+    } catch (error) {
+      console.error('Error submitting customization:', error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Add form fields for each input, e.g.: */}
+      <input
+        type="text"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        placeholder="Enter Cake Name"
+        required
+      />
+      <input
+        type="text"
+        name="CakeFlavor"
+        value={formData.CakeFlavor}
+        onChange={handleChange}
+        placeholder="Enter Cake Flavor"
+        required
+      />
 
   // Handle input change for form fields
   const handleChange = (e) => {
@@ -100,7 +169,10 @@ function Customize() {
   // Reset the form fields
   const handleReset = () => {
     setFormData({
-      flavor: [],
+      cakeId: '', 
+      name: '',
+      CakeFlavor: '', 
+      customFlavor: '',
       customFlavor: '',
       sizeInKgs: 1,
       decorations: [],
