@@ -4,7 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // Import Axios
 
 function Catalogue() {
-  const navigate = useNavigate(); // Initialize navigation hook
+const Catalogue = () => {
+  const [cakeId, setCakeId] = useState('');
+  const [cakeFlavor, setCakeFlavor] = useState('');
+  const [name, setName] = useState('');
+  
+const navigate = useNavigate(); // Initialize navigation hook
 
   const cakes = [
     { name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg' },
@@ -33,15 +38,16 @@ function Catalogue() {
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
-  const handleCustomize = (cake) => {
-    // Navigate to the customization page with cakeId, CakeFlavor, and name
-    navigate('/customize', {
-      state: {
-        cakeId: cake._id,
-        cakeFlavor: cake.name, // Adjust this according to your data structure
-        name: cake.name // Adjust as needed
-      }
-    });
+const handleSelectCake = (selectedCake) => {
+    setCakeId(selectedCake._id);
+    setCakeFlavor(selectedCake.flavor);
+    setCakeName(SelectCake.name);
+    
+  };  
+
+ const handleSubmit = () => {
+    // Navigate to the Customize page with selected cake info
+    navigate(`/customize?cakeId=${cakeId}&cakeFlavor=${cakeFlavor}&name=${name}`);
   };
 
   const createOrder = async (orderData) => {
