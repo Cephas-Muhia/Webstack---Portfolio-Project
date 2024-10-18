@@ -27,7 +27,7 @@ function Customize() {
   const [colors, setColors] = useState([]); // To handle multiple colors
   const [cakeData, setCakeData] = useState(null); // To store fetched cake data
 
-  // Fetch cake data when component mounts or orderId changes
+    // Fetch cake data when component mounts or orderId changes
   useEffect(() => {
     const fetchCakeData = async () => {
       try {
@@ -62,37 +62,6 @@ function Customize() {
     }
   }, [orderId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:5000/api/customizations', formData);
-      console.log('Customization created:', response.data);
-      navigate('/somewhere'); // Redirect after successful submission
-    } catch (error) {
-      console.error('Error submitting customization:', error);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Add form fields for each input, e.g.: */}
-      <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        placeholder="Enter Cake Name"
-        required
-      />
-      <input
-        type="text"
-        name="CakeFlavor"
-        value={formData.CakeFlavor}
-        onChange={handleChange}
-        placeholder="Enter Cake Flavor"
-        required
-      />
-
   // Handle input change for form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,7 +76,7 @@ function Customize() {
     const options = Array.from(e.target.selectedOptions, option => option.value);
     if (options.length <= 3) {
       setFlavors(options);
-      setFormData({ ...formData, flavor: options });
+      setFormData({ ...formData, flavors: options });
     }
   };
 
@@ -120,7 +89,7 @@ function Customize() {
   const handleColorChange = (e) => {
     const options = Array.from(e.target.selectedOptions, option => option.value);
     setColors(options);
-    setFormData({ ...formData, preferredColors: options });
+    setFormData({ ...formData, preferredColors: options.join(', ') }); // Join array to string for preferredColors
   };
 
   // Handle decoration selection
@@ -134,37 +103,54 @@ function Customize() {
 
   // Handle file upload for the cake design image
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    const uploadForm = new FormData();
-    uploadForm.append('designImage', file);
+  const file = e.target.files[0];
+  const formData = new FormData();
+  formData.append('designImage', file);
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/uploads', uploadForm, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setFormData({
-        ...formData,
-        designImage: response.data.filePath, // Save file path to state
-      });
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    }
-  };
+  try {
+    const response = await axios.post('http://localhost:5000/api/uploads', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log('File uploaded successfully', response.data);
+  } catch (error) {
+    console.error('Error uploading file:', error);
+  }
+};
 
-  // Submit the customization to the backend
-  const handleSubmit = async () => {
-    try {
-      await axios.post(`http://localhost:5000/api/customizations`, {
-        cakeId: orderId, // Reference to the order or cake ID
-        ...formData, // Spread form data to include all fields
-      });
-      navigate(`/cart/${orderId}`); // Redirect to Cart page with order ID
-    } catch (error) {
-      console.error('Error submitting customization:', error);
-    }
-  };
+
+   // Submit the customization to the backend
+     const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const customizationData = {
+  name: order?.name || '',  // Use optional chaining to avoid errors if order is undefined
+  flavor: selectedFlavor,  // Selected flavor or custom flavor
+  customFlavor: customFlavor || '',  // User's custom flavor (optional)
+  sizeInKgs: cakeSize,  // Size of the cake in kg
+  shape: selectedShape,  // Cake shape (Square, Round, etc.)
+  icingType: selectedIcing,  // Selected icing type (e.g. 'Hard icing', 'Soft icing', 'Fresh cream')
+  decorations: selectedDecorations,  // Selected decorations or extras
+  message: customMessage || '',  // Custom cake message
+  additionalDescription: additionalDescription || '',  // Additional customization description (optional)
+  preferredColors: selectedColors,  // Colors selected for the cake decoration
+  designImage: uploadedImage || '',  // Reference to the uploaded image for the cake design
+};
+
+try {
+  const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
+  console.log("Order created successfully:", response.data.order);
+
+  // Assuming response.data.order contains the order ID
+  const orderId = response.data.order._id; // Adjust this based on your API response
+
+  // Redirect to Cart page with order ID
+  navigate(`/cart/${orderId}`);
+} catch (error) {
+  console.error("Error in order creation:", error);
+}
+
 
   // Reset the form fields
   const handleReset = () => {
@@ -173,7 +159,6 @@ function Customize() {
       name: '',
       CakeFlavor: '', 
       customFlavor: '',
-      customFlavor: '',
       sizeInKgs: 1,
       decorations: [],
       icingType: 'Soft icing',
@@ -181,7 +166,7 @@ function Customize() {
       celebrationExtras: [],
       message: '',
       additionalDescription: '',
-      preferredColors: [],
+      preferredColors: '',
       designImage: ''
     });
     setFlavors([]);
@@ -345,4 +330,3 @@ function Customize() {
 }
 
 export default Customize;
-
