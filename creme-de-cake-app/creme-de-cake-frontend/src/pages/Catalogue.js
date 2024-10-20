@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import React from 'react'; 
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios'; // Import Axios
+import axios from 'axios';
 
 function Catalogue() {
-  const [cakeId, setCakeId] = useState('');
-  const [cakeFlavor, setCakeFlavor] = useState('');
-  const [name, setName] = useState('');
-
   const navigate = useNavigate(); // Initialize navigation hook
 
   const cakes = [
-    { id: 1, name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg', flavor: 'Marble' },
-    { id: 2, name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg', flavor: 'Vanilla' },
-    { id: 3, name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg', flavor: 'Orange' },
-     { name: 'Banana Cake', description: 'A moist and soft cake made with ripe bananas and topped with creamy frosting.', imgUrl: '/images/banana-cake.jpg' },
-    { name: 'Pinacolada Cake', description: 'Tropical cake made with pineapple and coconut, delivering a refreshing taste.', imgUrl: '/images/pinacolada-cake.jpg' },
+    { name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg', flavor: 'Marble' },
+    { name: 'Vanilla Cake', description: 'A light, fluffy, and moist classic cake, perfect for any occasion.', imgUrl: '/images/vanilla-cake.jpg', flavor: 'Vanilla' },
+    { name: 'Orange Cake', description: 'Zesty, citrusy cake made with fresh orange juice and zest for a refreshing flavor.', imgUrl: '/images/orange-cake.jpg', flavor: 'Orange' },
+    { name: 'Banana Cake', description: 'A moist and soft cake made with ripe bananas and topped with creamy frosting.', imgUrl: '/images/banana-cake.jpg', flavor: 'Banana' },
+    { name: 'Pinacolada Cake', description: 'Tropical cake made with pineapple and coconut, delivering a refreshing taste.', imgUrl: '/images/pinacolada-cake.jpg', flavor: 'Pinacolada' },
     { name: 'Fruit Cake', description: 'A rich, dense cake loaded with dried fruits and nuts, often soaked in brandy or rum.', imgUrl: '/images/fruit-cake.jpg' },
     { name: 'Lemon Cake', description: 'Tangy and refreshing cake infused with lemon juice and zest.', imgUrl: '/images/lemon-cake.jpg' },
     { name: 'Red Velvet', description: 'Velvety smooth red cake with cream cheese frosting.', imgUrl: '/images/red-velvet.jpg' },
@@ -35,44 +31,33 @@ function Catalogue() {
     { name: 'Royal Velvet Cake', description: 'An elegant variation of the classic red velvet, richer in flavor with sophisticated frosting and decoration.', imgUrl: '/images/royal-velvet-cake.jpg' },
     { name: 'Amarula Cake', description: 'A moist cake flavored with Amarula cream liqueur, perfect for a boozy dessert experience.', imgUrl: '/images/amarula-cake.jpg' },
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
+
   ];
 
-  const handleSelectCake = (selectedCake) => {
-    setCakeId(selectedCake.id);
-    setCakeFlavor(selectedCake.CakeFlavor);
-    setName(selectedCake.name);
+  // Function to handle selecting a cake and submitting to the backend
+  const handleCustomizeCake = async (cake) => {
+    const { name, flavor } = cake;
 
-    // Navigate to Customize page with selected cake info
-    navigate(`/customize?cakeId=${selectedCake.id}&cakeFlavor=${selectedCake.flavor}&name=${selectedCake.name}`);
-  };
-
-  const handleSubmit = async () => {
-    // Ensure all required fields are available
-    if (!cakeId || !cakeFlavor || !name) {
-      console.error('Required fields are missing');
-      return;
-    }
-
+    // Prepare the payload for submission (no cakeId at this stage)
     const payload = {
-      cakeId,
-      flavor: cakeFlavor,
+      flavor,
       name,
-      user: 'user_id', 
+      user: 'user_id', // Assuming this comes from logged-in user
     };
 
     try {
       const response = await axios.post('http://localhost:5000/api/customization', payload);
       console.log('Customization submitted successfully:', response.data);
 
-      // Navigate to the customization page after successful submission
+      // Navigate to the customize page using the order ID returned by the backend
       const createdOrder = response.data;
-      navigate(`/customize/${createdOrder._id}`);
+      navigate(`/customize/${createdOrder._id}`, { state: { flavor } }); // Passing the flavor via state
     } catch (error) {
       console.error('Error submitting customization:', error.response?.data || error.message);
     }
   };
 
-     return (
+  return (
     <div
       className="d-flex flex-column justify-content-center align-items-center"
       style={{
@@ -90,8 +75,8 @@ function Catalogue() {
       </div>
 
       <div className="row mt-4">
-        {cakes.map((cake) => (
-          <div className="col-md-4 mb-4" key={cake.id}> {/* Ensure cake.id is unique */}
+        {cakes.map((cake, index) => (
+          <div className="col-md-4 mb-4" key={index}> 
             <div className="card shadow" style={{ borderRadius: '10px' }}>
               <img
                 src={cake.imgUrl}
@@ -105,7 +90,7 @@ function Catalogue() {
                 <button
                   className="btn btn-lg"
                   style={{ backgroundColor: '#3e2c41', color: 'white' }}
-                  onClick={() => handleSelectCake(cake)} // Set selected cake details
+                  onClick={() => handleCustomizeCake(cake)} // Pass the cake details to the function
                 >
                   Customize
                 </button>
@@ -114,15 +99,9 @@ function Catalogue() {
           </div>
         ))}
       </div>
-
-      <button
-        className="btn btn-primary mt-4"
-        onClick={handleSubmit} // Trigger the submit when clicked
-      >
-        Submit Customization
-      </button>
     </div>
   );
 }
 
 export default Catalogue;
+

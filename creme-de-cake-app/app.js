@@ -1,4 +1,4 @@
-const express = require('express');
+ express = require('express');
 const passport = require('passport');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -7,13 +7,13 @@ const authRoutes = require('./routes/authRoutes');
 const cakeRoutes = require('./routes/cakeRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
+const customizationRoutes = require('./routes/customizationRoutes');
+const bodyParser = require('body-parser');
+const Customization = require('./models/Customization');
 const orderController = require('./controllers/orderController');
 const uploadRoutes = require('./routes/uploadRoutes');
-const customizationRoutes = require('./routes/customizationRoutes');
 const multer = require('multer');
-const bodyParser = require('body-parser');
 const Cake = require('./models/Cake');
-const Customization = require('./models/Customization');
 const authMiddleware = require('./middleware/authMiddleware'); // Adjusted import
 
 require('./config/passport')(passport); // Passport configuration
@@ -48,10 +48,9 @@ app.use('/api/cakes', cakeRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', uploadRoutes);
-app.use('/api', customizationRoutes);
 app.use('/api', orderRoutes);
 app.post('/api/orders', orderController.createOrder);
-
+app.use('/api/customization', customizationRoutes);
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/creme_de_cake')
   .then(() => {

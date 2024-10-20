@@ -1,57 +1,22 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const customizationSchema = new mongoose.Schema({
-  cakeId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Cake', 
-    required: true 
-  }, // Reference to the Cake model
-  name: { 
-    type: String, 
-    required: true 
-  }, // Name of the customization
-  flavor: { 
-    type: String, 
-    required: true // Renamed for consistency 
-  },  // Standard flavor (required field)
-  customFlavor: { 
-    type: String, 
-    required: false // Custom flavor; no specific price enforcement
-  },
-  sizeInKgs: { 
-    type: Number, 
-    required: true // Size in kilograms (required field)
-  }, 
-  icingType: { 
-    type: String, 
-    enum: ['Hard icing', 'Soft icing', 'Fresh cream'], 
-    required: true // Required icing type
-  }, 
-  shape: { 
-    type: String, 
-    enum: ['Square', 'Round', 'Stacked', 'HeartShape'], 
-    required: true // Required cake shape
-  }, 
-  celebrationExtras: [{ 
-    type: String 
-  }], // Array to hold multiple extras; can store strings without price enforcement
-  message: { 
-    type: String, 
-    required: true // Required message
-  }, 
-  additionalDescription: { 
-    type: String, 
-    required: false // Optional additional description
-  }, 
-  preferredColors: [{ 
-    type: String 
-  }], // Changed to an array to store multiple colors
-  designImage: { 
-    type: String, 
-    required: false // Optional design
-  }
-}, 
-{ timestamps: true });
+const customizationSchema = new Schema({
+  flavor: { type: String, required: true },  // Initial flavor chosen by the user
+  customFlavor: { type: String },            // If the user selects a custom flavor
+  sizeInKgs: { type: Number },               // Will be filled in later
+  decorations: { type: String },             // Will be filled in later
+  icingType: { type: String, enum: ['Hard icing', 'Soft icing', 'Fresh cream'] },  // Will be filled in later
+  shape: { type: String, enum: ['Square', 'Round', 'Stacked', 'HeartShape'] },     // Will be filled in later
+  preferredColors: { type: String },          // Will be filled in later
+  designImage: { type: String },              // Will be filled in later
+  message: { type: String },                 // Custom message for the cake
+  additionalDescription: { type: String },   // Additional details for customization
+  name: { type: String, required: true },    // Cake name (selected in the Catalogue)
+  user: { type: Schema.Types.ObjectId, ref: 'User', default: null },  // Reference to the user
+  createdAt: { type: Date, default: Date.now },  // Timestamp of the customization
+});
 
-module.exports = mongoose.model('Customization', customizationSchema);
+const Customization = mongoose.model('Customization', customizationSchema);
+module.exports = Customization;
 
