@@ -7,4 +7,4 @@ find . -name "*:Zone.Identifier" -type f -delete
 find . -name "*.jpg.jpg" -type f -exec rm -f {} \;
 
 # Remove .webp duplicates
-find . -name "*.webp" -type f -exec rm -f {} \;
+#find . -name "*.webp" -type f -exec rm -f {} \;

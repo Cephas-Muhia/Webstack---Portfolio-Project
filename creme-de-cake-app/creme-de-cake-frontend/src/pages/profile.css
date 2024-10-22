@@ -1,0 +1,77 @@
+.user-profile-container {
+  margin-top: 80px; 
+  background-size: center;
+  background-position: center;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 250px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+  text-align: center;
+  color: #3e2c41;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.register-button {
+  background-color: #4CAF50; /* Green */
+  margin-top: 10px; /* Space between buttons */
+}
+
+.register-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+.sign-in-button {
+  background-color: #2196F3; /* Blue */
+  margin-top: 10px; /* Space between buttons */
+}
+
+.sign-in-button:hover {
+  background-color: #0b7dda; /* Darker blue on hover */
+}
+
+.login-container {
+  text-align: center;
+}
+
+.google-login {
+  margin-top: 20px;
+}
+ .google-login-button {
+ background-color: #2196F3; /* Blue */
+ margin-top: 10px; /* Space between buttons */
+}
+
+.profile {
+  text-align: center;
+}
+
+.profile-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
