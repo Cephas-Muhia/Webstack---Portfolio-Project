@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 router.use(authMiddleware);
 // Constants
-const JWT_SECRET = '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';
+const JWT_SECRET = 'process.env.GOOGLE_CLIENT_SECRET';
 
 
 // 1. User Registration

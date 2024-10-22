@@ -5,8 +5,8 @@ const User = require('../models/User');
 const { OAuth2Client } = require('google-auth-library');
 
 const router = express.Router();
-const client = new OAuth2Client('505698084821-goohuj9c4u4ajr98fq1dd941usu24boc.apps.googleusercontent.com');
-const JWT_SECRET = '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';
+const client = new OAuth2Client('process.env.GOOGLE_CLIENT_ID');
+const JWT_SECRET = 'process.env.GOOGLE_CLIENT_SECRET';
 
 // 1. User Registration
 router.post('/register', async (req, res) => {
@@ -87,7 +87,7 @@ router.post('/google', async (req, res) => {
     // Verify the Google token
     const ticket = await client.verifyIdToken({
       idToken: idToken,
-      audience: '505698084821-goohuj9c4u4ajr98fq1dd941usu24boc.apps.googleusercontent.com',
+      audience: 'process.env.GOOGLE_CLIENT_ID',
     });
 
     const { name, email, picture: profilePhoto } = ticket.getPayload(); // Extract user info
