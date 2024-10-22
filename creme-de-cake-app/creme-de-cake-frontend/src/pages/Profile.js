@@ -6,7 +6,7 @@ import './profile.css';
 const UserProfilePage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [userDetails, setUserDetails] = useState({
     name: '',
@@ -73,7 +73,7 @@ const UserProfilePage = () => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, {
         ...userDetails,
-        preferredCakeFlavors: userDetails.preferredCakeFlavors.join(',').split(','),
+        preferredCakeFlavors: userDetails.preferredCakeFlavors.filter(Boolean),
       });
       setIsRegistered(true);
       alert("Registration successful! You can now sign in.");
@@ -90,7 +90,7 @@ const UserProfilePage = () => {
     try {
       const response = await axios.put(`${API_URL}/auth/update`, {
         ...userDetails,
-        preferredCakeFlavors: userDetails.preferredCakeFlavors.join(',').split(','),
+        preferredCakeFlavors: userDetails.preferredCakeFlavors.filter(Boolean),
       });
       setUserDetails(response.data.user);
       alert("Profile updated successfully!");
@@ -222,24 +222,23 @@ const UserProfilePage = () => {
                   </button>
                 </p>
               </form>
-             <div className="google-login">
-           <h4>Or sign in with Google</h4>
-        <GoogleLogin
-          onSuccess={handleGoogleLoginSuccess}
-            onError={() => setError('Google login failed')}
-             >
-              <button className="google-login-button" type="button">
-               Sign In with Google
-                </button>
-                 </GoogleLogin>
-                </div>
-
+              <div className="google-login">
+                <h4>Or sign in with Google</h4>
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={() => setError('Google login failed')}
+                >
+                  <button className="google-login-button" type="button">
+                    Sign In with Google
+                  </button>
+                </GoogleLogin>
+              </div>
             </div>
           )}
         </div>
       ) : (
         <div className="profile">
-          <img src={userDetails.profilePhoto} alt="Profile" className="profile-photo" />
+          {userDetails.profilePhoto && <img src={userDetails.profilePhoto} alt="Profile" className="profile-photo" />}
           <p><strong>Name:</strong> {userDetails.name}</p>
           <p><strong>Email:</strong> {userDetails.email}</p>
           <p><strong>Phone Number:</strong> {userDetails.phoneNumber}</p>

@@ -43,6 +43,7 @@ app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/dist')));
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/build')));
 
 // API routes
+// Use the authentication routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cakes', cakeRoutes);
 app.use('/api/orders', orderRoutes);
