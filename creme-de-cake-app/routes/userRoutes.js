@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv').config();
 
 const router = express.Router();
 router.use(authMiddleware);

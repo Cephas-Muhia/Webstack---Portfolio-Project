@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { OAuth2Client } = require('google-auth-library');
+const dotenv = require('dotenv').config();
 
 const router = express.Router();
 const client = new OAuth2Client('process.env.GOOGLE_CLIENT_ID');
