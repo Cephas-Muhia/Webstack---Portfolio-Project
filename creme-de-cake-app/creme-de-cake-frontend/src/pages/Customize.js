@@ -34,7 +34,7 @@ function Customize() {
         const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
         const cake = response.data;
 
-        setFormData((prevData) => ({
+        setFormData(prevData => ({
           ...prevData,
           cakeId: cake._id,
           name: cake.name || '',
@@ -63,36 +63,36 @@ function Customize() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
+    setFormData(prevData => ({
       ...prevData,
       [name]: value,
     }));
   };
 
   const handleFlavorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, (option) => option.value);
+    const options = Array.from(e.target.selectedOptions, option => option.value);
     if (options.length <= 3) {
       setFlavors(options);
-      setFormData((prevData) => ({ ...prevData, CakeFlavor: options }));
+      setFormData(prevData => ({ ...prevData, CakeFlavor: options }));
     }
   };
 
   const handleCustomFlavorChange = (e) => {
-    setFormData((prevData) => ({ ...prevData, customFlavor: e.target.value }));
+    setFormData(prevData => ({ ...prevData, customFlavor: e.target.value }));
   };
 
   const handleColorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, (option) => option.value);
+    const options = Array.from(e.target.selectedOptions, option => option.value);
     setColors(options);
-    setFormData((prevData) => ({ ...prevData, preferredColors: options }));
+    setFormData(prevData => ({ ...prevData, preferredColors: options }));
   };
 
   const handleDecorationChange = (e) => {
     const { value, checked } = e.target;
     const updatedDecorations = checked
       ? [...formData.decorations, value]
-      : formData.decorations.filter((decoration) => decoration !== value);
-    setFormData((prevData) => ({ ...prevData, decorations: updatedDecorations }));
+      : formData.decorations.filter(decoration => decoration !== value);
+    setFormData(prevData => ({ ...prevData, decorations: updatedDecorations }));
   };
 
   const handleFileUpload = async (e) => {
@@ -106,7 +106,7 @@ function Customize() {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setFormData((prevData) => ({ ...prevData, designImage: response.data.filePath }));
+      setFormData(prevData => ({ ...prevData, designImage: response.data.filePath }));
     } catch (error) {
       console.error('Error uploading file:', error);
       setError('File upload failed. Please try again.');
@@ -128,13 +128,8 @@ function Customize() {
       designImage: formData.designImage,
     };
 
-    // Log the data to see what is being sent
-    console.log('Customization data being sent:', customizationData);
-
     try {
       const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-      console.log('Customization submitted successfully:', response.data);
-      
       const newOrderId = response.data.order._id;
       navigate(`/cart/${newOrderId}`);
     } catch (error) {
@@ -176,12 +171,7 @@ function Customize() {
         {/* Icing Type */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>Select Icing</label>
-          <select
-            className="form-select"
-            name="icingType"
-            value={formData.icingType}
-            onChange={handleChange}
-          >
+          <select className="form-select" name="icingType" value={formData.icingType} onChange={handleChange}>
             <option value="Soft icing">Soft icing</option>
             <option value="Hard icing">Hard icing</option>
             <option value="Fresh cream">Fresh cream</option>
@@ -243,81 +233,74 @@ function Customize() {
 
         {/* Decorations */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Decorations</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Select Celebration extra.</label>
           <div>
-            {['Sprinkles', 'Candles', 'Edible Glitter', 'Flowers'].map((decoration) => (
-              <div key={decoration}>
+            {['Sprinkles', 'Candles', 'Flowers', 'Edible Glitter'].map((decoration) => (
+              <div className="form-check" key={decoration}>
                 <input
                   type="checkbox"
+                  className="form-check-input"
                   value={decoration}
                   checked={formData.decorations.includes(decoration)}
                   onChange={handleDecorationChange}
                 />
-                <label className="ms-2">{decoration}</label>
+                <label className="form-check-label" style={{ color: '#3e2c41' }}>{decoration}</label>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Preferred Colors */}
+        {/* Message */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Up to 3 Preferred Colors</label>
-          <select multiple className="form-select" value={colors} onChange={handleColorChange}>
-            <option value="Red">Red</option>
-            <option value="Blue">Blue</option>
-            <option value="Green">Green</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Pink">Pink</option>
-            <option value="Black">Black</option>
-            <option value="White">White</option>
-          </select>
-          <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
-          {colors.length >= 3 && <p className="text-warning">You can only select up to 3 colors.</p>}
-        </div>
-
-        {/* Custom Message */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Add a Custom Message</label>
-          <textarea
+          <label className="form-label" style={{ color: '#3e2c41' }}>What Message would you like to see on your cake</label>
+          <input
+            type="text"
             className="form-control"
-            rows="3"
             name="message"
             value={formData.message}
             onChange={handleChange}
-            placeholder="Write your message here"
-            style={{ borderColor: '#3e2c41', borderWidth: '2px' }}
+            placeholder="Write a message for the cake"
           />
         </div>
 
         {/* Additional Description */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Additional Description</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Add additional description of how you want your cake to be done.</label>
           <textarea
             className="form-control"
-            rows="3"
             name="additionalDescription"
             value={formData.additionalDescription}
             onChange={handleChange}
-            placeholder="Any additional details about your cake design"
-            style={{ borderColor: '#3e2c41', borderWidth: '2px' }}
+            rows="3"
+            placeholder="Any extra details for customization?"
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Preferred Colors */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Upload a Design Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="form-control"
-            onChange={handleFileUpload}
-          />
+          <label className="form-label" style={{ color: '#3e2c41' }}>Select Preferred Colors</label>
+          <select multiple className="form-select" value={colors} onChange={handleColorChange}>
+            <option value="Red">Red</option>
+            <option value="Blue">Blue</option>
+            <option value="Green">Green</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Purple">Purple</option>
+            <option value="Pink">Pink</option>
+            <option value="Orange">Orange</option>
+          </select>
+          <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
+        </div>
+
+        {/* Design Image Upload */}
+        <div className="mb-4">
+          <label className="form-label" style={{ color: '#3e2c41' }}>Upload Design Image of how you envision your cake to look like.</label>
+          <input type="file" className="form-control" accept="image/*" onChange={handleFileUpload} />
           {formData.designImage && <p className="text-success">Image uploaded successfully!</p>}
         </div>
 
-        <div className="d-flex justify-content-between">
+        <div className="text-center">
+          <button type="submit" className="btn btn-primary me-2">Submit Customized Cake</button>
           <button type="button" className="btn btn-secondary" onClick={handleReset}>Reset Customization</button>
-          <button type="submit" className="btn btn-primary">Submit Customized Cake</button>
         </div>
       </form>
     </div>
