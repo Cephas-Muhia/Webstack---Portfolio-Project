@@ -51,3 +51,46 @@ exports.googleLogin = async (req, res) => {
   // Verify Google idToken, handle logic, and create/sign in the user
 };
 
+// Get User Profile (Protected Route)
+const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // Use verified token's user ID
+        const user = await User.findById(userId).select('-password'); // Exclude password
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch user profile' });
+    }
+};
+
+// Get All Users (Admin Route)
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch all users
+        res.status(200).json(users); // Return users as JSON
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching users' });
+    }
+};
+
+// Delete User
+const deleteUser = async (req, res) => {
+    const { id } = req.params; // Extract user ID from request parameters
+
+    try {
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error deleting user' });
+    }
+};
+
+
+module.exports = {getUserProfile, getAllUsers, deleteUser};

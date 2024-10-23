@@ -2,12 +2,11 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { updateUser, savePreferredFlavor } = require('../controllers/userController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, authMiddleware } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
 const dotenv = require('dotenv').config();
-const auth = require('../middleware/authMiddleware');
-
+const {getUserProfile, getAllUsers, deleteUser } = require('../controllers/authController'); 
+const { updateUser, savePreferredFlavor } = require('../controllers/userController');
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -68,8 +67,12 @@ router.post('/register', async (req, res) => {
 
 console.log('updateUser function:', updateUser);
 console.log('savePreferredFlavor function:', savePreferredFlavor);
+// Update user profile route
+router.put('/update', authMiddleware, updateUser);
 
-router.put('/update', verifyToken, updateUser);
+// Save preferred flavor route
+router.put('/flavor', authMiddleware, savePreferredFlavor);
+
 
 // 3. User Login
 router.post('/login', async (req, res) => {
@@ -121,45 +124,13 @@ router.post('/google', async (req, res) => {
 
 
 // 5. Get User Profile (Protected Route)
-router.get('/profile', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; // Use verified token's user ID
-        const user = await User.findById(userId).select('-password'); // Exclude password
-        res.status(200).json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to fetch user profile' });
-    }
-});
+router.get('/profile', verifyToken, getUserProfile);
 
 // 6. Get All Users (Admin Route)
-router.get('/users', authMiddleware, async (req, res) => { // Only admins can access this route
-    try {
-        const users = await User.find(); // Fetch all users
-        res.status(200).json(users); // Return users as JSON
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching users' });
-    }
-});
+router.get('/users', authMiddleware, getAllUsers);
 
 // 7. Delete User
-router.delete('/users/delete/:id', authMiddleware, async (req, res) => { // Only admins can access this route
-    const { id } = req.params; // Extract user ID from request parameters
-
-    try {
-        const deletedUser = await User.findByIdAndDelete(id);
-
-        if (!deletedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.status(200).json({ message: 'User deleted successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error deleting user' });
-    }
-});
+router.delete('/users/delete/:id', authMiddleware, deleteUser);
 
 module.exports = router;
 
