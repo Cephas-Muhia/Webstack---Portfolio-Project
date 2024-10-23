@@ -1,16 +1,15 @@
 const express = require('express');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware'); 
-const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 
 const router = express.Router();
 router.use(authMiddleware);
-// Constants
-const JWT_SECRET = 'process.env.GOOGLE_CLIENT_SECRET';
 
+
+const JWT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'defaultsecret'; // Fallback in case the env variable is missing
 
 // 1. User Registration
 router.post('/register', async (req, res) => {
@@ -33,11 +32,10 @@ router.post('/register', async (req, res) => {
     await newUser.save();
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
-    console.error("Error during registration:", error);  // Log the actual error
+    console.error("Error during registration:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // 2. User Login
 router.post('/login', async (req, res) => {
@@ -102,6 +100,7 @@ router.put('/profile', async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
+    // Update user fields
     user.name = name || user.name;
     user.phoneNumber = phoneNumber || user.phoneNumber;
     user.birthday = birthday || user.birthday;
