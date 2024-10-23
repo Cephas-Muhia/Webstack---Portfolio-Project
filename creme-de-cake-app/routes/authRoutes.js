@@ -2,16 +2,20 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { updateUser, savePreferredFlavor } = require('../controllers/userController');
+const { verifyToken } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
 const dotenv = require('dotenv').config();
+const auth = require('../middleware/authMiddleware');
+
 
 const router = express.Router();
-const client = new OAuth2Client('process.env.GOOGLE_CLIENT_ID');
-const JWT_SECRET = 'process.env.GOOGLE_CLIENT_SECRET';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const JWT_SECRET = process.env.JWT_SECRET; // Use the secret from environment variables
 
 // 1. User Registration
 router.post('/register', async (req, res) => {
-    const { name, email, phoneNumber, password, confirmPassword, birthday, address, preferredCakeFlavors } = req.body;
+    const { name, email, phoneNumber, password, confirmPassword, birthday, address, preferredCakeFlavor, profilePhotos } = req.body;
 
     try {
         // Validate input
@@ -48,7 +52,7 @@ router.post('/register', async (req, res) => {
             birthday,
             address,
             preferredCakeFlavors,
-            profilePhoto: null // Set default or handle profile photo appropriately
+            profilePhoto: null 
         });
 
         // Save user to the database
@@ -59,76 +63,77 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Error registering user' });
     }
 });
- 
 
-// 2. User Login
+// 2. Update user profile
+
+console.log('updateUser function:', updateUser);
+console.log('savePreferredFlavor function:', savePreferredFlavor);
+
+router.put('/update', verifyToken, updateUser);
+
+// 3. User Login
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    try {
+        const user = await User.findOne({ email });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Generate JWT
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error logging in user' });
     }
-
-    // Generate JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token, user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error logging in user' });
-  }
 });
 
-// 3. Google Login
+// Google Login
 router.post('/google', async (req, res) => {
-  const { idToken } = req.body;
+    const { idToken } = req.body;
 
-  try {
-    // Verify the Google token
-    const ticket = await client.verifyIdToken({
-      idToken: idToken,
-      audience: 'process.env.GOOGLE_CLIENT_ID',
-    });
+    try {
+        // Verify the Google token
+        const ticket = await client.verifyIdToken({
+            idToken: idToken,
+            audience: process.env.GOOGLE_CLIENT_ID, // Use the actual environment variable
+        });
 
-    const { name, email, picture: profilePhoto } = ticket.getPayload(); // Extract user info
+        const { name, email, picture: profilePhoto } = ticket.getPayload(); // Extract user info
 
-    let user = await User.findOne({ email });
-    if (!user) {
-      // If user does not exist, create a new user
-      user = new User({ name, email, phoneNumber: '', profilePicture: profilePhoto });
-      await user.save();
+        let user = await User.findOne({ email });
+        if (!user) {
+            // If user does not exist, create a new user
+            user = new User({ name, email, phoneNumber: '', profilePhoto }); // Save profile photo URL
+            await user.save();
+        }
+
+        // Generate JWT
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token, user });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        res.status(500).json({ message: 'Failed to verify Google token' });
     }
-
-    // Generate JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token, user });
-  } catch (error) {
-    console.error(error); // Log the error for debugging
-    res.status(500).json({ message: 'Failed to verify Google token' });
-  }
 });
 
-// 4. Get User Profile (Protected Route)
-router.get('/profile', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1]; // Assuming Bearer token
 
-  if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password'); // Exclude password
-    res.status(200).json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Failed to fetch user profile' });
-  }
+// 5. Get User Profile (Protected Route)
+router.get('/profile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id; // Use verified token's user ID
+        const user = await User.findById(userId).select('-password'); // Exclude password
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch user profile' });
+    }
 });
 
-// 5. Get All Users
-router.get('/users', async (req, res) => {
+// 6. Get All Users (Admin Route)
+router.get('/users', authMiddleware, async (req, res) => { // Only admins can access this route
     try {
         const users = await User.find(); // Fetch all users
         res.status(200).json(users); // Return users as JSON
@@ -138,13 +143,13 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// 6. Delete User
-router.delete('/users/delete/:id', async (req, res) => {
+// 7. Delete User
+router.delete('/users/delete/:id', authMiddleware, async (req, res) => { // Only admins can access this route
     const { id } = req.params; // Extract user ID from request parameters
 
     try {
         const deletedUser = await User.findByIdAndDelete(id);
-        
+
         if (!deletedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -155,7 +160,6 @@ router.delete('/users/delete/:id', async (req, res) => {
         res.status(500).json({ message: 'Error deleting user' });
     }
 });
-
 
 module.exports = router;
 

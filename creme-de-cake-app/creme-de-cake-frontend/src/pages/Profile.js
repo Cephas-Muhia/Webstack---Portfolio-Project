@@ -101,6 +101,24 @@ const UserProfilePage = () => {
     }
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    // Clear the user state and mark as signed out
+    setIsSignedIn(false);
+    setUserDetails({
+      name: '',
+      email: '',
+      phoneNumber: '',
+      profilePhoto: null,
+      birthday: '',
+      address: '',
+      preferredCakeFlavors: [],
+      password: '',
+      confirmPassword: '',
+    });
+    alert("Logged out successfully!");
+  };
+
   // Effect to load user data if signed in
   useEffect(() => {
     if (isSignedIn) {
@@ -248,6 +266,9 @@ const UserProfilePage = () => {
           <button onClick={handleProfileUpdate} className="update-button" disabled={loading}>
             {loading ? 'Updating...' : 'Update Profile'}
           </button>
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
         </div>
       )}
     </div>
@@ -255,4 +276,5 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
+
 

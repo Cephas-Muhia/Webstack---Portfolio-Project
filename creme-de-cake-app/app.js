@@ -14,7 +14,7 @@ const orderController = require('./controllers/orderController');
 const uploadRoutes = require('./routes/uploadRoutes');
 const multer = require('multer');
 const Cake = require('./models/Cake');
-const authMiddleware = require('./middleware/authMiddleware'); // Adjusted import
+const authMiddleware = require('./middleware/authMiddleware');
 
 require('./config/passport')(passport); // Passport configuration
 
