@@ -2,16 +2,15 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { verifyToken } = require('../middleware/authMiddleware');
-const { OAuth2Client } = require('google-auth-library');
 const dotenv = require('dotenv').config();
+const { OAuth2Client } = require('google-auth-library');
 const { getUserProfile, getAllUsers, deleteUser } = require('../controllers/authController'); 
 const { updateUser, savePreferredFlavor } = require('../controllers/userController');
-const authMiddleware = require('../middleware/authMiddleware'); 
+const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const JWT_SECRET = process.env.JWT_SECRET; // Use the secret from environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // 1. User Registration
 router.post('/register', async (req, res) => {
@@ -45,8 +44,8 @@ router.post('/register', async (req, res) => {
             password: hashedPassword,
             birthday,
             address,
-            preferredCakeFlavors: [preferredCakeFlavor], // flavors can be many so an  array if necessary
-            profilePhoto: null 
+            preferredCakeFlavors: [preferredCakeFlavor],
+            profilePhoto: null
         });
 
         await newUser.save();
@@ -57,11 +56,11 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// 2. Update user profile route
-router.put('/update', authMiddleware, updateUser); // Use updateUser from the controller
+// 2. Update User Profile Route
+router.put('/update', authMiddleware, updateUser);
 
-// 3. Save preferred flavor route
-router.put('/flavor', authMiddleware, savePreferredFlavor); // Use savePreferredFlavor from the controller
+// 3. Save Preferred Flavor Route
+router.put('/flavor', authMiddleware, savePreferredFlavor);
 
 // 4. User Login
 router.post('/login', async (req, res) => {
@@ -108,7 +107,7 @@ router.post('/google', async (req, res) => {
 });
 
 // 6. Get User Profile (Protected Route)
-router.get('/profile', verifyToken, getUserProfile);
+router.get('/profile', authMiddleware, getUserProfile);
 
 // 7. Get All Users (Admin Route)
 router.get('/users', authMiddleware, getAllUsers);

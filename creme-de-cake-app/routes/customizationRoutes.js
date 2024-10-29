@@ -1,30 +1,31 @@
 const express = require('express');
+const mongoose = require('mongoose'); // Import mongoose to use ObjectId
 const router = express.Router();
 const Customization = require('../models/Customization');
 
 // POST request to create a new customization (for both Catalogue and Customize page)
 router.post('/', async (req, res) => {
     const {
-        flavor,             // Required field from both pages
-        name,               // Required field from both pages
-        customFlavor = '',   // Optional, defaults to empty string
-        sizeInKgs = null,    // Optional, defaults to null
-        decorations = null,  // Optional, defaults to null
-        icingType = null,    // Optional, defaults to null
-        shape = null,        // Optional, defaults to null
-        CelebrationExtras = null, // Optional, defaults to null
-        message = '',        // Optional, defaults to empty string
-        AdditionalDescription = '',  // Optional, defaults to empty string
-        preferredColors = null,      // Optional, defaults to null
-        designImage = null,          // Optional, defaults to null
-        user = null                 // User will be assigned later at checkout if necessary
+        flavor,
+        name,
+        customFlavor = '',
+        sizeInKgs = null,
+        decorations = null,
+        icingType = null,
+        shape = null,
+        CelebrationExtras = null,
+        message = '',
+        AdditionalDescription = '',
+        preferredColors = null,
+        designImage = null,
+        user = null
     } = req.body;
 
     try {
-        // Set user to null if not provided (not registered)
-        const userId = user ? user : null;
+        // Check if user is provided and is a valid ObjectId, else set it to null
+        const userId = user && mongoose.Types.ObjectId.isValid(user) ? mongoose.Types.ObjectId(user) : null;
 
-        // Create a new customization object based on the provided data
+        // Create a new customization object
         const newCustomization = new Customization({
             flavor,
             name,
@@ -38,7 +39,7 @@ router.post('/', async (req, res) => {
             AdditionalDescription,
             preferredColors,
             designImage,
-            user: userId  // Use the userId (null if not registered)
+            user: userId // Assign the processed userId here
         });
 
         // Save the new customization to the database
@@ -54,5 +55,4 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
-
 
