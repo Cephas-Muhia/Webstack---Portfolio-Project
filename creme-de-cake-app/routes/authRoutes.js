@@ -2,11 +2,12 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { verifyToken, authMiddleware } = require('../middleware/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
 const dotenv = require('dotenv').config();
 const { getUserProfile, getAllUsers, deleteUser } = require('../controllers/authController'); 
 const { updateUser, savePreferredFlavor } = require('../controllers/userController');
+const authMiddleware = require('../middleware/authMiddleware'); 
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
