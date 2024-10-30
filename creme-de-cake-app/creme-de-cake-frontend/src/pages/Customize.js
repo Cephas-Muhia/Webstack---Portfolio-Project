@@ -26,7 +26,6 @@ function Customize() {
   const [cakeData, setCakeData] = useState(null);
   const [error, setError] = useState(null);
 
-  // Fetch cake data by orderId from API
   useEffect(() => {
     const fetchCakeData = async () => {
       try {
@@ -54,17 +53,12 @@ function Customize() {
       }
     };
 
-    if (orderId) {
-      fetchCakeData();
-    }
+    if (orderId) fetchCakeData();
   }, [orderId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
   const handleFlavorChange = (e) => {
@@ -100,9 +94,7 @@ function Customize() {
 
     try {
       const response = await axios.post('http://localhost:5000/api/uploads', uploadData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       setFormData(prevData => ({ ...prevData, designImage: response.data.filePath }));
     } catch (error) {
@@ -126,15 +118,28 @@ function Customize() {
       designImage: formData.designImage,
     };
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-      const newOrderId = response.data.order._id;
-      navigate(`/cart/${newOrderId}`);
-    } catch (error) {
-      console.error('Error creating customization:', error);
-      setError('Failed to submit customization. Please try again.');
-    }
-  };
+  try {
+  console.log("Customization payload:", customizationData); // Log the data you're sending
+  const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
+  
+  // Inspect the entire response structure
+  console.log("Response from server:", response);
+  
+  // Check if order ID exists in the response
+  if (response.data && response.data.order && response.data.order._id) {
+    const newOrderId = response.data.order._id; // Safely access order ID
+    console.log("Customization created successfully:", response.data);
+    navigate(`/cart/${newOrderId}`);
+  } else {
+    console.error("Order ID not found in response:", response.data);
+    setError('Failed to retrieve order ID. Please try again.');
+  }
+} catch (error) {
+  console.error("Error creating customization:", error);
+  setError('Failed to submit customization. Please try again.');
+}
+
+
 
   const handleReset = () => {
     setFormData({
@@ -230,74 +235,113 @@ function Customize() {
 
         {/* Decorations */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Celebration extra.</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Choose Decorations</label>
           <div>
-            {['Sprinkles', 'Candles', 'Flowers', 'Edible Glitter'].map((decoration) => (
-              <div className="form-check" key={decoration}>
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  value={decoration}
-                  checked={formData.decorations.includes(decoration)}
-                  onChange={handleDecorationChange}
-                />
-                <label className="form-check-label" style={{ color: '#3e2c41' }}>{decoration}</label>
-              </div>
-            ))}
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value="Sprinkles"
+                checked={formData.decorations.includes('Sprinkles')}
+                onChange={handleDecorationChange}
+              />
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>Sprinkles (Ksh300)</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value="Flowers"
+                checked={formData.decorations.includes('Flowers')}
+                onChange={handleDecorationChange}
+              />
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>Flowers (Ksh400)</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value="Candles"
+                checked={formData.decorations.includes('Candles')}
+                onChange={handleDecorationChange}
+              />
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>Candles (Ksh250)</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value="Edible Glitter"
+                checked={formData.decorations.includes('Edible Glitter')}
+                onChange={handleDecorationChange}
+              />
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>Edible Glitter (Ksh500)</label>
+            </div>
           </div>
         </div>
 
-        {/* Message */}
+        {/* Custom Message */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>What Message would you like to see on your cake</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Enter Custom Message</label>
           <input
             type="text"
             className="form-control"
             name="message"
             value={formData.message}
             onChange={handleChange}
-            placeholder="Write a message for the cake"
+            placeholder="Write a special message for the cake"
+            maxLength="50"
+            style={{ borderColor: '#3e2c41' }}
           />
         </div>
 
         {/* Additional Description */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Add additional description of how you want your cake to be done.</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Additional Description</label>
           <textarea
             className="form-control"
             name="additionalDescription"
             value={formData.additionalDescription}
             onChange={handleChange}
             rows="3"
-            placeholder="Any extra details for customization?"
+            placeholder="Provide any additional instructions or details"
+            style={{ borderColor: '#3e2c41' }}
           />
         </div>
 
         {/* Preferred Colors */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Preferred Colors</label>
-          <select multiple className="form-select" value={colors} onChange={handleColorChange}>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Choose Preferred Colors</label>
+          <select
+            multiple
+            className="form-select"
+            value={colors}
+            onChange={handleColorChange}
+            style={{ borderColor: '#3e2c41' }}
+          >
             <option value="Red">Red</option>
-            <option value="Blue">Blue</option>
-            <option value="Green">Green</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Purple">Purple</option>
             <option value="Pink">Pink</option>
+            <option value="Green">Green</option>
+            <option value="Blue">Blue</option>
+            <option value="Yellow">Yellow</option>
             <option value="Orange">Orange</option>
+            <option value="Purple">Purple</option>
+            <option value="Gold">Gold</option>
+            <option value="Silver">Silver</option>
           </select>
           <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
         </div>
 
-        {/* Design Image Upload */}
+        {/* Image Upload */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Upload Design Image of how you envision your cake to look like.</label>
-          <input type="file" className="form-control" accept="image/*" onChange={handleFileUpload} />
-          {formData.designImage && <p className="text-success">Image uploaded successfully!</p>}
+          <label className="form-label" style={{ color: '#3e2c41' }}>Upload Cake Design Image</label>
+          <input type="file" className="form-control" onChange={handleFileUpload} style={{ borderColor: '#3e2c41' }} />
         </div>
 
-        <div className="text-center">
-          <button type="submit" className="btn btn-primary me-2">Submit Customized Cake</button>
-          <button type="button" className="btn btn-secondary" onClick={handleReset}>Reset Customization</button>
+        {/* Submit and Reset Buttons */}
+        <div className="d-flex justify-content-center gap-3 mt-4">
+          <button type="button" onClick={handleReset} className="btn btn-outline-secondary">Reset Customization</button>
+          <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}>Submit Customized Cake</button>
         </div>
       </form>
     </div>

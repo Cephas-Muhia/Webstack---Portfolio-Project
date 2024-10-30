@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
 function Catalogue() {
-  const navigate = useNavigate(); // Initialize navigation hook
+  const navigate = useNavigate();
 
   const cakes = [
     { name: 'Marble Cake', description: 'A delicious blend of vanilla and chocolate swirled together, creating a beautiful marbled pattern.', imgUrl: '/images/marble-cake.jpg', flavor: 'Marble' },
@@ -31,17 +31,16 @@ function Catalogue() {
     { name: 'Royal Velvet Cake', description: 'An elegant variation of the classic red velvet, richer in flavor with sophisticated frosting and decoration.', imgUrl: '/images/royal-velvet-cake.jpg' },
     { name: 'Amarula Cake', description: 'A moist cake flavored with Amarula cream liqueur, perfect for a boozy dessert experience.', imgUrl: '/images/amarula-cake.jpg' },
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
-
   ];
 
-    const handleCustomizeCake = async (cake) => {
+  const handleCustomizeCake = async (cake) => {
     const { name, flavor } = cake;
     const payload = { flavor, name, user: 'user_id' }; // Replace 'user_id' with actual logged-in user ID
 
     try {
       const response = await axios.post('http://localhost:5000/api/customization', payload);
       const createdOrder = response.data;
-      navigate(`/customize/${createdOrder._id}`, { state: { flavor, name } }); // Pass flavor and name in state
+      navigate(`/customize/${createdOrder._id}`, { state: { flavor, name } });
     } catch (error) {
       console.error('Error submitting customization:', error.response?.data || error.message);
     }
@@ -51,9 +50,9 @@ function Catalogue() {
     <div
       className="d-flex flex-column justify-content-center align-items-center"
       style={{
-        backgroundColor: '#f5e1a4', // Global background color
-        minHeight: '100vh', // Full height for the page
-        color: '#3e2c41', // Dark brown color for text
+        backgroundColor: '#f5e1a4',
+        minHeight: '100vh',
+        color: '#3e2c41',
         padding: '20px',
       }}
     >
@@ -66,21 +65,25 @@ function Catalogue() {
 
       <div className="row mt-4">
         {cakes.map((cake, index) => (
-          <div className="col-md-4 mb-4" key={index}> 
-            <div className="card shadow" style={{ borderRadius: '10px' }}>
+          <div className="col-md-4 mb-4" key={index}>
+            <div className="card shadow-sm" style={{ borderRadius: '10px' }}>
               <img
                 src={cake.imgUrl}
                 className="card-img-top"
                 alt={cake.name}
-                style={{ borderRadius: '20px 20px 0 0', height: '400px', objectFit: 'cover' }}
+                style={{
+                  borderRadius: '10px 10px 0 0',
+                  height: '300px',
+                  objectFit: 'cover',
+                }}
               />
               <div className="card-body text-center">
                 <h5 className="card-title mb-2">{cake.name}</h5>
-                <p className="card-text mb-4">{cake.description}</p>
+                <p className="card-text">{cake.description}</p>
                 <button
-                  className="btn btn-lg"
+                  className="btn btn-primary btn-lg mt-3"
                   style={{ backgroundColor: '#3e2c41', color: 'white' }}
-                  onClick={() => handleCustomizeCake(cake)} // Pass the cake details to the function
+                  onClick={() => handleCustomizeCake(cake)}
                 >
                   Customize
                 </button>
