@@ -34,24 +34,14 @@ function Catalogue() {
 
   ];
 
-  // Function to handle selecting a cake and submitting to the backend
-  const handleCustomizeCake = async (cake) => {
+    const handleCustomizeCake = async (cake) => {
     const { name, flavor } = cake;
-
-    // Prepare the payload for submission (no cakeId at this stage)
-    const payload = {
-      flavor,
-      name,
-      user: 'user_id', // Assuming this comes from logged-in user
-    };
+    const payload = { flavor, name, user: 'user_id' }; // Replace 'user_id' with actual logged-in user ID
 
     try {
       const response = await axios.post('http://localhost:5000/api/customization', payload);
-      console.log('Customization submitted successfully:', response.data);
-
-      // Navigate to the customize page using the order ID returned by the backend
       const createdOrder = response.data;
-      navigate(`/customize/${createdOrder._id}`, { state: { flavor } }); // Passing the flavor via state
+      navigate(`/customize/${createdOrder._id}`, { state: { flavor, name } }); // Pass flavor and name in state
     } catch (error) {
       console.error('Error submitting customization:', error.response?.data || error.message);
     }

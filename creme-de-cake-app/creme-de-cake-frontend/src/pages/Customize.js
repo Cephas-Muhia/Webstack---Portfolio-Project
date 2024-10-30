@@ -15,7 +15,6 @@ function Customize() {
     decorations: [],
     icingType: 'Soft icing',
     shape: 'Round',
-    celebrationExtras: [],
     message: '',
     additionalDescription: '',
     preferredColors: [],
@@ -43,7 +42,6 @@ function Customize() {
           decorations: cake.decorations || [],
           icingType: cake.icingType || 'Soft icing',
           shape: cake.shape || 'Round',
-          celebrationExtras: cake.celebrationExtras || [],
           message: cake.message || '',
           additionalDescription: cake.additionalDescription || '',
           preferredColors: cake.preferredColors || [],
@@ -148,7 +146,6 @@ function Customize() {
       decorations: [],
       icingType: 'Soft icing',
       shape: 'Round',
-      celebrationExtras: [],
       message: '',
       additionalDescription: '',
       preferredColors: [],
@@ -221,7 +218,7 @@ function Customize() {
         </div>
 
         {/* Cake Shape Selection */}
-        <div className="mb-4">
+          <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Shape</label>
           <select className="form-select" name="shape" value={formData.shape} onChange={handleChange}>
             <option value="Round">Round</option>
