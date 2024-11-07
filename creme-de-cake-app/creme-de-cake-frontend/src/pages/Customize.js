@@ -8,7 +8,6 @@ function Customize() {
 
   const [formData, setFormData] = useState({
     cakeId: '',
-    name: '',
     CakeFlavor: '',
     customFlavor: '',
     sizeInKgs: 1,
@@ -23,11 +22,12 @@ function Customize() {
 
   const [flavors, setFlavors] = useState([]);
   const [colors, setColors] = useState([]);
-  const [cakeData, setCakeData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCakeData = async () => {
+      if (!orderId) return; // Skip fetch if no orderId
+
       try {
         const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
         const cake = response.data;
@@ -35,7 +35,6 @@ function Customize() {
         setFormData(prevData => ({
           ...prevData,
           cakeId: cake._id,
-          name: cake.name || '',
           CakeFlavor: cake.flavor || '',
           sizeInKgs: cake.sizeInKgs || 1,
           decorations: cake.decorations || [],
@@ -46,20 +45,14 @@ function Customize() {
           preferredColors: cake.preferredColors || [],
           designImage: cake.designImage || '',
         }));
-        setCakeData(cake);
       } catch (error) {
         setError('Error fetching cake data. Please try again later.');
         console.error('Error fetching cake data:', error);
       }
     };
 
-    if (orderId) fetchCakeData();
+    fetchCakeData();
   }, [orderId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevData => ({ ...prevData, [name]: value }));
-  };
 
   const handleFlavorChange = (e) => {
     const options = Array.from(e.target.selectedOptions, option => option.value);
@@ -106,7 +99,6 @@ function Customize() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const customizationData = {
-      name: formData.name,
       flavor: formData.CakeFlavor.length > 0 ? formData.CakeFlavor : formData.customFlavor,
       sizeInKgs: formData.sizeInKgs,
       shape: formData.shape,
@@ -118,33 +110,23 @@ function Customize() {
       designImage: formData.designImage,
     };
 
-  try {
-  console.log("Customization payload:", customizationData); // Log the data you're sending
-  const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-  
-  // Inspect the entire response structure
-  console.log("Response from server:", response);
-  
-  // Check if order ID exists in the response
-  if (response.data && response.data.order && response.data.order._id) {
-    const newOrderId = response.data.order._id; // Safely access order ID
-    console.log("Customization created successfully:", response.data);
-    navigate(`/cart/${newOrderId}`);
-  } else {
-    console.error("Order ID not found in response:", response.data);
-    setError('Failed to retrieve order ID. Please try again.');
-  }
-} catch (error) {
-  console.error("Error creating customization:", error);
-  setError('Failed to submit customization. Please try again.');
-}
-
-
+    try {
+      const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
+      if (response.data && response.data.order && response.data.order._id) {
+        const newOrderId = response.data.order._id;
+        navigate(`/cart/${newOrderId}`);
+      } else {
+        setError('Failed to retrieve order ID. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error creating customization:", error);
+      setError('Failed to submit customization. Please try again.');
+    }
+  };
 
   const handleReset = () => {
     setFormData({
       cakeId: '',
-      name: '',
       CakeFlavor: '',
       customFlavor: '',
       sizeInKgs: 1,
@@ -160,7 +142,7 @@ function Customize() {
     setColors([]);
   };
 
-  return (
+    return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh', padding: '20px', borderRadius: '8px' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '2rem' }}>Customize Your Cake</h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
@@ -349,4 +331,3 @@ function Customize() {
 }
 
 export default Customize;
-

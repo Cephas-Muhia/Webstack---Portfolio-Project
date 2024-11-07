@@ -34,13 +34,13 @@ function Catalogue() {
   ];
 
   const handleCustomizeCake = async (cake) => {
-    const { name, flavor } = cake;
-    const payload = { flavor, name, user: 'user_id' }; // Replace 'user_id' with actual logged-in user ID
+    const { flavor } = cake;
+    const payload = { flavor, user: 'user_id' }; // Replace 'user_id' with actual logged-in user ID
 
     try {
       const response = await axios.post('http://localhost:5000/api/customization', payload);
       const createdOrder = response.data;
-      navigate(`/customize/${createdOrder._id}`, { state: { flavor, name } });
+      navigate(`/customize/${createdOrder._id}`, { state: { flavor } });
     } catch (error) {
       console.error('Error submitting customization:', error.response?.data || error.message);
     }
