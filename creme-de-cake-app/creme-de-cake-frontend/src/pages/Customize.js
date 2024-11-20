@@ -26,7 +26,7 @@ function Customize() {
 
   useEffect(() => {
     const fetchCakeData = async () => {
-      if (!orderId) return; // Skip fetch if no orderId
+      if (!orderId) return;
 
       try {
         const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
@@ -53,6 +53,15 @@ function Customize() {
 
     fetchCakeData();
   }, [orderId]);
+
+  // Define the handleChange function
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const handleFlavorChange = (e) => {
     const options = Array.from(e.target.selectedOptions, option => option.value);
@@ -142,7 +151,7 @@ function Customize() {
     setColors([]);
   };
 
-    return (
+      return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh', padding: '20px', borderRadius: '8px' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '2rem' }}>Customize Your Cake</h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
