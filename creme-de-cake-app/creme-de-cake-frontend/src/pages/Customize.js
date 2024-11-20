@@ -1,156 +1,105 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Customize() {
-  const { orderId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    CakeFlavor: '',
+  // State for customization form
+  const [customization, setCustomization] = useState({
+    flavor: '',
     customFlavor: '',
-    sizeInKgs: 1,
+    sizeInKgs: '',
     decorations: [],
-    icingType: 'Soft icing',
-    shape: 'Round',
+    icingType: '',
+    shape: '',
     message: '',
-    additionalDescription: '',
-    preferredColors: [],
-    designImage: '',
+    AdditionalDescription: '',
+    preferredColors: '',
+    designImage: null,
   });
 
-  const [flavors, setFlavors] = useState([]);
-  const [colors, setColors] = useState([]);
-  const [error, setError] = useState(null);
-
+  // Populate flavor if passed from Catalogue.js
   useEffect(() => {
-    const fetchCakeData = async () => {
-      if (!orderId) return;
+    if (location.state && location.state.flavor) {
+      setCustomization((prev) => ({ ...prev, flavor: location.state.flavor }));
+    }
+  }, [location.state]);
 
-      try {
-        const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
-        const cake = response.data;
-
-        // Populate formData based on the fetched cake data
-        setFormData(prevData => ({
-          ...prevData,
-          CakeFlavor: cake.flavor || '',
-          sizeInKgs: cake.sizeInKgs || 1,
-          decorations: cake.decorations || [],
-          icingType: cake.icingType || 'Soft icing',
-          shape: cake.shape || 'Round',
-          message: cake.message || '',
-          additionalDescription: cake.additionalDescription || '',
-          preferredColors: cake.preferredColors || [],
-          designImage: cake.designImage || '',
-        }));
-      } catch (error) {
-        setError('Error fetching cake data. Please try again later.');
-        console.error('Error fetching cake data:', error);
-      }
-    };
-
-    fetchCakeData();
-  }, [orderId]);
-
-  // Define the handleChange function
-  const handleChange = (e) => {
+  // Handle form input changes
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value,
+    setCustomization((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle checkbox selections for decorations and extras
+  const handleCheckboxChange = (e) => {
+    const { name, value, checked } = e.target;
+    setCustomization((prev) => ({
+      ...prev,
+      [name]: checked
+        ? [...prev[name], value]
+        : prev[name].filter((item) => item !== value),
     }));
   };
 
-  const handleFlavorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
-    if (options.length <= 3) {
-      setFlavors(options);
-      setFormData(prevData => ({ ...prevData, CakeFlavor: options }));
-    }
+  // Handle file input change for cake design image
+  const handleFileChange = (e) => {
+    setCustomization((prev) => ({
+      ...prev,
+      designImage: e.target.files[0],
+    }));
   };
 
-  const handleCustomFlavorChange = (e) => {
-    setFormData(prevData => ({ ...prevData, customFlavor: e.target.value }));
-  };
-
-  const handleColorChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
-    setColors(options);
-    setFormData(prevData => ({ ...prevData, preferredColors: options }));
-  };
-
-  const handleDecorationChange = (e) => {
-    const { value, checked } = e.target;
-    const updatedDecorations = checked
-      ? [...formData.decorations, value]
-      : formData.decorations.filter(decoration => decoration !== value);
-    setFormData(prevData => ({ ...prevData, decorations: updatedDecorations }));
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    const uploadData = new FormData();
-    uploadData.append('designImage', file);
-
+  // Handle form submission
+  const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/uploads', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const formData = new FormData();
+      Object.keys(customization).forEach((key) => {
+        if (key === 'designImage') {
+          if (customization[key]) {
+            formData.append(key, customization[key]);
+          }
+        } else if (Array.isArray(customization[key])) {
+          customization[key].forEach((item) => formData.append(key, item));
+        } else {
+          formData.append(key, customization[key]);
+        }
       });
-      setFormData(prevData => ({ ...prevData, designImage: response.data.filePath }));
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      setError('File upload failed. Please try again.');
-    }
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const customizationData = {
-      flavor: formData.CakeFlavor.length > 0 ? formData.CakeFlavor : formData.customFlavor,
-      sizeInKgs: formData.sizeInKgs,
-      shape: formData.shape,
-      icingType: formData.icingType,
-      decorations: formData.decorations,
-      message: formData.message,
-      additionalDescription: formData.additionalDescription,
-      preferredColors: formData.preferredColors.join(', '),
-      designImage: formData.designImage,
-    };
-
-    try {
-	  console.log("Sending customization data:", customizationData);
-      const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-      if (response.data && response.data._id) {
-        const newCustomizationId = response.data._id;
-        navigate(`/cart/${newCustomizationId}`);
-      } else {
-        setError('Failed to retrieve order ID. Please try again.');
+      // Send data to backend
+      const response = await axios.post(
+        'http://localhost:5000/api/customizations',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      if (response.status === 201) {
+        alert('Customization saved successfully!');
+        navigate('/cart', { state: { customizationId: response.data._id } });
       }
     } catch (error) {
-      console.error("Error creating customization:", error);
-      setError('Failed to submit customization. Please try again.');
+      console.error('Error saving customization:', error);
+      alert('Failed to save customization. Please try again.');
     }
   };
 
+  // Handle form reset
   const handleReset = () => {
-    setFormData({
-      CakeFlavor: '',
+    setCustomization({
+      flavor: location.state?.flavor || '',
       customFlavor: '',
-      sizeInKgs: 1,
+      sizeInKgs: '',
       decorations: [],
-      icingType: 'Soft icing',
-      shape: 'Round',
+      icingType: '',
+      shape: '',
       message: '',
-      additionalDescription: '',
-      preferredColors: [],
-      designImage: '',
+      AdditionalDescription: '',
+      preferredColors: '',
+      designImage: null,
     });
-    setFlavors([]);
-    setColors([]);
   };
-
-      return (
+        return (
     <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh', padding: '20px', borderRadius: '8px' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '2rem' }}>Customize Your Cake</h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
@@ -225,7 +174,7 @@ function Customize() {
 
         {/* Decorations */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Choose Decorations</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>Choose CelebrationExtras</label>
           <div>
             <div className="form-check form-check-inline">
               <input
@@ -318,6 +267,8 @@ function Customize() {
             <option value="Purple">Purple</option>
             <option value="Gold">Gold</option>
             <option value="Silver">Silver</option>
+            <option value="White">White</option>
+            <option value="Black">Black</option>
           </select>
           <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
         </div>
