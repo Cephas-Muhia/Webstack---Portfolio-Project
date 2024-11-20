@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -6,9 +6,18 @@ function Customize() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // All available flavors from the Catalogue.js
+  const availableFlavors = [
+    'Marble', 'Vanilla', 'Orange', 'Banana', 'Pinacolada', 'Fruit', 
+    'Lemon', 'Red Velvet', 'Chocolate', 'Black Forest', 'White Forest',
+    'Eggless', 'Pineapple', 'Blueberry', 'Coffee', 'Cheesecake', 
+    'Carrot', 'Coconut', 'Fudge', 'Mint', 'Chocolate Chip', 
+    'Royal Velvet', 'Amarula', 'Strawberry'
+  ];
+
   // Initialize form state with all required inputs
   const [customization, setCustomization] = useState({
-    flavor: '',
+    flavors: [],
     customFlavor: '',
     sizeInKgs: '1',
     decorations: [],
@@ -26,7 +35,7 @@ function Customize() {
   // Pre-fill flavor if passed from Catalogue.js
   useEffect(() => {
     if (location.state && location.state.flavor) {
-      setCustomization((prev) => ({ ...prev, flavor: location.state.flavor }));
+      setCustomization((prev) => ({ ...prev, flavors: [location.state.flavor] }));
     }
   }, [location.state]);
 
@@ -34,6 +43,19 @@ function Customize() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCustomization((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle flavor selection
+  const handleFlavorChange = (flavor) => {
+    setCustomization((prev) => {
+      const updatedFlavors = prev.flavors.includes(flavor)
+        ? prev.flavors.filter((f) => f !== flavor)
+        : [...prev.flavors, flavor];
+      if (updatedFlavors.length > 3) {
+        updatedFlavors.pop(); // Restrict to 3 flavors
+      }
+      return { ...prev, flavors: updatedFlavors };
+    });
   };
 
   // Handle checkbox selections for decorations and extras
@@ -54,8 +76,8 @@ function Customize() {
 
   // Form validation
   const validateForm = () => {
-    if (!customization.flavor && !customization.customFlavor) {
-      setError('Please select or enter a flavor for your cake.');
+    if (customization.flavors.length === 0 && !customization.customFlavor) {
+      setError('Please select or enter at least one flavor.');
       return false;
     }
     if (!customization.icingType) {
@@ -108,7 +130,7 @@ function Customize() {
   // Handle form reset
   const handleReset = () => {
     setCustomization({
-      flavor: location.state?.flavor || '',
+      flavors: [],
       customFlavor: '',
       sizeInKgs: '1',
       decorations: [],
@@ -121,6 +143,7 @@ function Customize() {
     });
     setError('');
   };
+
 
   return (
     <div
@@ -143,16 +166,34 @@ function Customize() {
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
         <div className="row">
           {/* Flavor Selection */}
           <div className="col-md-6 mb-3">
             <label className="form-label" style={{ color: '#3e2c41' }}>
-              Choose Cake Flavor
+              Choose Cake Flavor(s) (Up to 3)
             </label>
+            <div>
+              {availableFlavors.map((flavor, index) => (
+                <div key={index} className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id={`flavor-${flavor}`}
+                    value={flavor}
+                    checked={customization.flavors.includes(flavor)}
+                    onChange={() => handleFlavorChange(flavor)}
+                  />
+                  <label className="form-check-label" htmlFor={`flavor-${flavor}`}>
+                    {flavor}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {/* Custom Flavor Input */}
             <input
               type="text"
-              className="form-control"
+              className="form-control mt-2"
               name="customFlavor"
               value={customization.customFlavor}
               onChange={handleInputChange}
