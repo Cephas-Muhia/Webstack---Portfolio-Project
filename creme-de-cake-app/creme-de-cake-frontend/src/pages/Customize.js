@@ -85,7 +85,25 @@ function Customize() {
       setError('Please select a cake shape.');
       return false;
     }
+    if (customization.designImage && customization.designImage.size > 5 * 1024 * 1024) {
+      setError('Uploaded image size must be less than 5MB.');
+      return false;
+    }
     return true;
+  };
+
+  const createFormData = () => {
+    const formData = new FormData();
+    Object.keys(customization).forEach((key) => {
+      if (key === 'designImage' && customization[key]) {
+        formData.append(key, customization[key]);
+      } else if (Array.isArray(customization[key])) {
+        customization[key].forEach((item) => formData.append(key, item));
+      } else {
+        formData.append(key, customization[key]);
+      }
+    });
+    return formData;
   };
 
   const handleSubmit = async (e) => {
@@ -99,16 +117,7 @@ function Customize() {
     }
 
     try {
-      const formData = new FormData();
-      Object.keys(customization).forEach((key) => {
-        if (key === 'designImage' && customization[key]) {
-          formData.append(key, customization[key]);
-        } else if (Array.isArray(customization[key])) {
-          customization[key].forEach((item) => formData.append(key, item));
-        } else {
-          formData.append(key, customization[key]);
-        }
-      });
+      const formData = createFormData();
 
       const response = await axios.post(
         'http://localhost:5000/api/customizations',
@@ -161,9 +170,10 @@ function Customize() {
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
+      {isSubmitting && <div className="text-center text-warning">Submitting...</div>}
 
       <form onSubmit={handleSubmit}>
-        <div className="row">
+       <div className="row">
           {/* Flavor Selection */}
           <div className="col-md-6 mb-3">
             <label className="form-label" style={{ color: '#3e2c41' }}>
@@ -373,7 +383,7 @@ function Customize() {
           />
         </div>
 
-        <div className="d-flex justify-content-between mt-4">
+          <div className="d-flex justify-content-between mt-4">
           <button
             type="button"
             className="btn btn-secondary"
