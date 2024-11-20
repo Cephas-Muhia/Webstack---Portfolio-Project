@@ -1,35 +1,47 @@
-const express = require('express'); 
+const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const Customization = require('../models/Customization');
+const Cake = require('../models/Cake');  
 
 // POST request to create a new customization (for both Catalogue and Customize page)
 router.post('/', async (req, res) => {
     const {
         flavor,
-        customFlavor = '',
+        customFlavor = '', // Default empty string if no custom flavor is provided
         sizeInKgs = 1, // Default size in kg if not provided
-        decorations = [],
+        decorations = [], // Default empty array if no decorations are selected
         icingType = 'Soft icing', // Default icing type
         shape = 'Round', // Default shape
-        CelebrationExtras = [],
-        message = '',
-        AdditionalDescription = '',
-        preferredColors = [],
-        designImage = null,
-        user = null,
-        cakeId // Assuming cakeId is required for creating customization
+        message = '', // Default empty string for the message
+        AdditionalDescription = '', // Default empty string for additional description
+        preferredColors = [], // Default empty array for preferred colors
+        designImage = null, // Default null for design image if not provided
+        user = null // Default null for user if not provided
     } = req.body;
 
     try {
         // Validate required fields
-        if (!flavor) {
-            return res.status(400).json({ error: 'Flavor is required' });
+        if (!flavor || flavor.length === 0) {
+            return res.status(400).json({ error: 'At least one flavor is required' });
         }
 
-        // Ensure cakeId is provided and is a valid ObjectId
-        if (!cakeId || !mongoose.Types.ObjectId.isValid(cakeId)) {
-            return res.status(400).json({ error: 'Invalid or missing cakeId' });
+        // Create a new cake if no cakeId is provided
+        let cakeId;
+        if (!req.body.cakeId) {
+            // Assuming you can create a new Cake instance with default or user-specified data
+            const newCake = new Cake({
+                name: "New Cake", // Set default or dynamic name
+                description: "Default Cake Description", // Default or dynamic description
+                basePrice: 500, // Default base price or dynamic calculation
+                sizeInKgs: sizeInKgs, // Size passed in customization
+                // Add any other default fields or logic for the cake creation
+            });
+
+            const savedCake = await newCake.save();
+            cakeId = savedCake._id; // Get the newly created cake ID
+        } else {
+            cakeId = req.body.cakeId; // Use the provided cakeId if it's given
         }
 
         // Process the user field to ensure a valid ObjectId or set it to null
@@ -43,13 +55,12 @@ router.post('/', async (req, res) => {
             decorations,
             icingType,
             shape,
-            CelebrationExtras,
             message,
             AdditionalDescription,
             preferredColors,
             designImage,
             user: userId,
-            cakeId: mongoose.Types.ObjectId(cakeId) // Ensure cakeId is a valid ObjectId
+            cakeId: mongoose.Types.ObjectId(cakeId) // Ensure cakeId is valid
         });
 
         // Save the new customization to the database
@@ -64,4 +75,3 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
-

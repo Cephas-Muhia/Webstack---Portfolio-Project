@@ -7,7 +7,6 @@ function Customize() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    cakeId: '',
     CakeFlavor: '',
     customFlavor: '',
     sizeInKgs: 1,
@@ -32,9 +31,9 @@ function Customize() {
         const response = await axios.get(`http://localhost:5000/api/cakes/${orderId}`);
         const cake = response.data;
 
+        // Populate formData based on the fetched cake data
         setFormData(prevData => ({
           ...prevData,
-          cakeId: cake._id,
           CakeFlavor: cake.flavor || '',
           sizeInKgs: cake.sizeInKgs || 1,
           decorations: cake.decorations || [],
@@ -120,10 +119,11 @@ function Customize() {
     };
 
     try {
+	  console.log("Sending customization data:", customizationData);
       const response = await axios.post('http://localhost:5000/api/customizations', customizationData);
-      if (response.data && response.data.order && response.data.order._id) {
-        const newOrderId = response.data.order._id;
-        navigate(`/cart/${newOrderId}`);
+      if (response.data && response.data._id) {
+        const newCustomizationId = response.data._id;
+        navigate(`/cart/${newCustomizationId}`);
       } else {
         setError('Failed to retrieve order ID. Please try again.');
       }
@@ -135,7 +135,6 @@ function Customize() {
 
   const handleReset = () => {
     setFormData({
-      cakeId: '',
       CakeFlavor: '',
       customFlavor: '',
       sizeInKgs: 1,

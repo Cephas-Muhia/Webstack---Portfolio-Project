@@ -5,7 +5,7 @@ const CustomizationSchema = new mongoose.Schema({
   cakeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Cake',
-    required: false, // Not required
+    required: false, // Not required as cakeId will be automatically created by MongoDB
   },
   flavor: {
     type: [String],
@@ -48,7 +48,7 @@ const CustomizationSchema = new mongoose.Schema({
     type: [String],
   },
   designImage: {
-    type: String, // URL or file path
+    type: String, // URL or file path for design image
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -60,7 +60,7 @@ const CustomizationSchema = new mongoose.Schema({
   },
 });
 
-// Validator to ensure flavor selection limit
+// Validator to ensure flavor selection limit (up to 3 flavors)
 function flavorsLimit(val) {
   return val.length <= 3;
 }

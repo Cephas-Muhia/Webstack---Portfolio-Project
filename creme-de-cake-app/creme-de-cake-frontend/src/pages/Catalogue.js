@@ -33,17 +33,10 @@ function Catalogue() {
     { name: 'Strawberry Cake', description: 'A sweet and fruity cake made with fresh strawberries, perfect for summer celebrations.', imgUrl: '/images/strawberry-cake.jpg' },
   ];
 
-  const handleCustomizeCake = async (cake) => {
+    const handleCustomizeCake = (cake) => {
     const { flavor } = cake;
-    const payload = { flavor, user: 'user_id' }; // Replace 'user_id' with actual logged-in user ID
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/customization', payload);
-      const createdOrder = response.data;
-      navigate(`/customize/${createdOrder._id}`, { state: { flavor } });
-    } catch (error) {
-      console.error('Error submitting customization:', error.response?.data || error.message);
-    }
+    // Navigate to Customize.js with the selected flavor
+    navigate('/customize', { state: { flavor } });
   };
 
   return (
