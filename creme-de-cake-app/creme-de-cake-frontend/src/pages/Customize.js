@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -6,16 +6,14 @@ function Customize() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // All available flavors from the Catalogue.js
   const availableFlavors = [
-    'Marble', 'Vanilla', 'Orange', 'Banana', 'Pinacolada', 'Fruit', 
+    'Marble', 'Vanilla', 'Orange', 'Banana', 'Pinacolada', 'Fruit',
     'Lemon', 'Red Velvet', 'Chocolate', 'Black Forest', 'White Forest',
-    'Eggless', 'Pineapple', 'Blueberry', 'Coffee', 'Cheesecake', 
-    'Carrot', 'Coconut', 'Fudge', 'Mint', 'Chocolate Chip', 
-    'Royal Velvet', 'Amarula', 'Strawberry'
+    'Eggless', 'Pineapple', 'Blueberry', 'Coffee', 'Cheesecake',
+    'Carrot', 'Coconut', 'Fudge', 'Mint', 'Chocolate Chip',
+    'Royal Velvet', 'Amarula', 'Strawberry',
   ];
 
-  // Initialize form state with all required inputs
   const [customization, setCustomization] = useState({
     flavors: [],
     customFlavor: '',
@@ -29,36 +27,34 @@ function Customize() {
     designImage: null,
   });
 
-  // Error state
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pre-fill flavor if passed from Catalogue.js
   useEffect(() => {
     if (location.state && location.state.flavor) {
-      setCustomization((prev) => ({ ...prev, flavors: [location.state.flavor] }));
+      setCustomization((prev) => ({
+        ...prev,
+        flavors: [location.state.flavor],
+      }));
     }
   }, [location.state]);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCustomization((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle flavor selection
   const handleFlavorChange = (flavor) => {
     setCustomization((prev) => {
       const updatedFlavors = prev.flavors.includes(flavor)
         ? prev.flavors.filter((f) => f !== flavor)
         : [...prev.flavors, flavor];
-      if (updatedFlavors.length > 3) {
-        updatedFlavors.pop(); // Restrict to 3 flavors
-      }
-      return { ...prev, flavors: updatedFlavors };
+      return updatedFlavors.length <= 3
+        ? { ...prev, flavors: updatedFlavors }
+        : { ...prev };
     });
   };
 
-  // Handle checkbox selections for decorations and extras
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     setCustomization((prev) => ({
@@ -69,12 +65,13 @@ function Customize() {
     }));
   };
 
-  // Handle file input change for cake design image
   const handleFileChange = (e) => {
-    setCustomization((prev) => ({ ...prev, designImage: e.target.files[0] }));
+    setCustomization((prev) => ({
+      ...prev,
+      designImage: e.target.files[0],
+    }));
   };
 
-  // Form validation
   const validateForm = () => {
     if (customization.flavors.length === 0 && !customization.customFlavor) {
       setError('Please select or enter at least one flavor.');
@@ -91,12 +88,15 @@ function Customize() {
     return true;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -110,7 +110,6 @@ function Customize() {
         }
       });
 
-      // Send data to backend
       const response = await axios.post(
         'http://localhost:5000/api/customizations',
         formData,
@@ -124,10 +123,11 @@ function Customize() {
     } catch (error) {
       console.error('Error saving customization:', error);
       setError('Failed to save customization. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Handle form reset
   const handleReset = () => {
     setCustomization({
       flavors: [],
@@ -144,29 +144,25 @@ function Customize() {
     setError('');
   };
 
-
   return (
     <div
-      className="container mt-5 p-4"
+      className="container mt-5 p-4 shadow"
       style={{
         backgroundColor: '#f5e1a4',
-        minHeight: '100vh',
         borderRadius: '8px',
+        minHeight: '100vh',
       }}
     >
-      <h1 className="text-center" style={{ color: '#3e2c41' }}>
+      <h1 className="text-center" style={{ color: '#3e2c41', fontWeight: 'bold' }}>
         Customize Your Cake
       </h1>
-      <p
-        className="text-center lead mb-4"
-        style={{ color: '#3e2c41', fontStyle: 'italic' }}
-      >
+      <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
         Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div className="row">
           {/* Flavor Selection */}
           <div className="col-md-6 mb-3">
@@ -376,14 +372,22 @@ function Customize() {
             placeholder="Any extra details for your cake?"
           />
         </div>
-       
 
-        <div className="d-flex justify-content-between">
-          <button type="button" className="btn btn-secondary" onClick={handleReset}>
+        <div className="d-flex justify-content-between mt-4">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleReset}
+            disabled={isSubmitting}
+          >
             Reset Customization
           </button>
-          <button type="submit" className="btn btn-primary">
-            Submit Customized Cake
+          <button
+            type="submit"
+            className="btn btn-success"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Submit Custom Cake'}
           </button>
         </div>
       </form>
