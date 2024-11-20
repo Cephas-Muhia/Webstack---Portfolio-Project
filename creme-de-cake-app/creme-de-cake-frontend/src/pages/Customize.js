@@ -6,7 +6,7 @@ function Customize() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // State for customization form
+  // Initialize form state with all required inputs
   const [customization, setCustomization] = useState({
     flavor: '',
     customFlavor: '',
@@ -23,7 +23,7 @@ function Customize() {
   // Error state
   const [error, setError] = useState('');
 
-  // Populate flavor if passed from Catalogue.js
+  // Pre-fill flavor if passed from Catalogue.js
   useEffect(() => {
     if (location.state && location.state.flavor) {
       setCustomization((prev) => ({ ...prev, flavor: location.state.flavor }));
@@ -138,13 +138,28 @@ function Customize() {
         className="text-center lead mb-4"
         style={{ color: '#3e2c41', fontStyle: 'italic' }}
       >
-         Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
+        Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="row">
+          {/* Flavor Selection */}
+          <div className="col-md-6 mb-3">
+            <label className="form-label" style={{ color: '#3e2c41' }}>
+              Choose Cake Flavor
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              name="customFlavor"
+              value={customization.customFlavor}
+              onChange={handleInputChange}
+              placeholder="Enter your custom flavor"
+            />
+          </div>
+
           {/* Icing Type */}
           <div className="col-md-6 mb-3">
             <label className="form-label" style={{ color: '#3e2c41' }}>
@@ -184,36 +199,18 @@ function Customize() {
           </div>
         </div>
 
-       {/* Cake Flavor Selection */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Up to 3 Cake Flavors</label>
-          <select multiple className="form-select" value={flavors} onChange={handleFlavorChange}>
-            <option value="Vanilla">Vanilla</option>
-            <option value="Strawberry">Strawberry</option>
-            <option value="Marble">Marble</option>
-            <option value="Red Velvet">Red Velvet</option>
-            <option value="Black Forest">Black Forest</option>
-            <option value="White Forest">White Forest</option>
-            <option value="Chocolate">Chocolate</option>
-            <option value="Lemon">Lemon</option>
-          </select>
-          <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple flavors.</small>
-          {flavors.length >= 3 && <p className="text-warning">You can only select up to 3 flavors.</p>}
-          <p className="mt-3" style={{ color: '#ff1493', fontWeight: 'bold' }}>Don't see your favorite flavor? Enter it below:</p>
-          <input
-            type="text"
-            className="form-control mt-2"
-            placeholder="Enter custom flavor"
-            value={formData.customFlavor}
-            onChange={handleCustomFlavorChange}
-            style={{ borderColor: '#ff6347', borderWidth: '2px' }}
-          />
-        </div>
-
         {/* Cake Shape Selection */}
-          <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Shape</label>
-          <select className="form-select" name="shape" value={formData.shape} onChange={handleChange}>
+        <div className="mb-4">
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Select Cake Shape
+          </label>
+          <select
+            className="form-select"
+            name="shape"
+            value={customization.shape}
+            onChange={handleInputChange}
+            style={{ borderColor: '#3e2c41' }}
+          >
             <option value="Round">Round</option>
             <option value="Square">Square</option>
             <option value="Stacked">Stacked</option>
@@ -221,127 +218,130 @@ function Customize() {
           </select>
         </div>
 
-        {/* Decorations */}
+        {/* Decoration Extras */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Choose CelebrationExtras</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Choose Celebration Extras
+          </label>
           <div>
             <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
                 type="checkbox"
                 value="Sprinkles"
-                checked={formData.decorations.includes('Sprinkles')}
-                onChange={handleDecorationChange}
+                checked={customization.decorations.includes('Sprinkles')}
+                onChange={handleCheckboxChange}
               />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>Sprinkles (Ksh300)</label>
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>
+                Sprinkles (Ksh300)
+              </label>
             </div>
             <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
                 type="checkbox"
                 value="Flowers"
-                checked={formData.decorations.includes('Flowers')}
-                onChange={handleDecorationChange}
+                checked={customization.decorations.includes('Flowers')}
+                onChange={handleCheckboxChange}
               />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>Flowers (Ksh400)</label>
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>
+                Flowers (Ksh400)
+              </label>
             </div>
             <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
                 type="checkbox"
                 value="Candles"
-                checked={formData.decorations.includes('Candles')}
-                onChange={handleDecorationChange}
+                checked={customization.decorations.includes('Candles')}
+                onChange={handleCheckboxChange}
               />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>Candles (Ksh250)</label>
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>
+                Candles (Ksh250)
+              </label>
             </div>
             <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
                 type="checkbox"
                 value="Edible Glitter"
-                checked={formData.decorations.includes('Edible Glitter')}
-                onChange={handleDecorationChange}
+                checked={customization.decorations.includes('Edible Glitter')}
+                onChange={handleCheckboxChange}
               />
-              <label className="form-check-label" style={{ color: '#3e2c41' }}>Edible Glitter (Ksh500)</label>
+              <label className="form-check-label" style={{ color: '#3e2c41' }}>
+                Edible Glitter (Ksh500)
+              </label>
             </div>
           </div>
         </div>
 
-        {/* Custom Message */}
+        {/* Preferred Colors */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Enter Custom Message</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Preferred Cake Colors
+          </label>
           <input
             type="text"
             className="form-control"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            placeholder="Write a special message for the cake"
-            maxLength="50"
-            style={{ borderColor: '#3e2c41' }}
+            name="preferredColors"
+            value={customization.preferredColors.join(', ')}
+            onChange={(e) => {
+              const colors = e.target.value.split(',').map((item) => item.trim());
+              setCustomization((prev) => ({ ...prev, preferredColors: colors }));
+            }}
+            placeholder="Enter preferred colors (comma separated)"
           />
         </div>
 
+        {/* Custom Message */}
+        <div className="mb-4">
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Custom Message
+          </label>
+          <textarea
+            className="form-control"
+            name="message"
+            value={customization.message}
+            onChange={handleInputChange}
+            rows="3"
+            placeholder="Enter your custom message"
+          />
+        </div>
+
+        {/* Cake Design Image */}
+        <div className="mb-4">
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Upload Cake Design Image
+          </label>
+          <input
+            type="file"
+            className="form-control"
+            name="designImage"
+            onChange={handleFileChange}
+          />
+        </div>
+       
         {/* Additional Description */}
         <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Additional Description</label>
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Additional Description
+          </label>
           <textarea
             className="form-control"
             name="additionalDescription"
-            value={formData.additionalDescription}
-            onChange={handleChange}
+            value={customization.additionalDescription}
+            onChange={handleInputChange}
             rows="3"
-            placeholder="Provide any additional instructions or details"
-            style={{ borderColor: '#3e2c41' }}
+            placeholder="Any extra details for your cake?"
           />
         </div>
+       
 
-        {/* Preferred Colors */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Choose Preferred Colors</label>
-          <select
-            multiple
-            className="form-select"
-            value={colors}
-            onChange={handleColorChange}
-            style={{ borderColor: '#3e2c41' }}
-          >
-            <option value="Red">Red</option>
-            <option value="Pink">Pink</option>
-            <option value="Green">Green</option>
-            <option value="Blue">Blue</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Orange">Orange</option>
-            <option value="Purple">Purple</option>
-            <option value="Gold">Gold</option>
-            <option value="Silver">Silver</option>
-            <option value="White">White</option>
-            <option value="Black">Black</option>
-          </select>
-          <small className="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple colors.</small>
-        </div>
-
-        {/* Image Upload */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Upload Cake Design Image</label>
-          <input type="file" className="form-control" onChange={handleFileUpload} style={{ borderColor: '#3e2c41' }} />
-        </div>
-
-        {/* Buttons */}
-        <div className="d-flex justify-content-center gap-3 mt-4">
-          <button
-            type="button"
-            onClick={handleReset}
-            className="btn btn-outline-secondary"
-          >
+        <div className="d-flex justify-content-between">
+          <button type="button" className="btn btn-secondary" onClick={handleReset}>
             Reset Customization
           </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
-          >
+          <button type="submit" className="btn btn-primary">
             Submit Customized Cake
           </button>
         </div>
