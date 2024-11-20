@@ -10,15 +10,18 @@ function Customize() {
   const [customization, setCustomization] = useState({
     flavor: '',
     customFlavor: '',
-    sizeInKgs: '',
+    sizeInKgs: '1',
     decorations: [],
     icingType: '',
     shape: '',
     message: '',
-    AdditionalDescription: '',
-    preferredColors: '',
+    additionalDescription: '',
+    preferredColors: [],
     designImage: null,
   });
+
+  // Error state
+  const [error, setError] = useState('');
 
   // Populate flavor if passed from Catalogue.js
   useEffect(() => {
@@ -35,32 +38,49 @@ function Customize() {
 
   // Handle checkbox selections for decorations and extras
   const handleCheckboxChange = (e) => {
-    const { name, value, checked } = e.target;
+    const { value, checked } = e.target;
     setCustomization((prev) => ({
       ...prev,
-      [name]: checked
-        ? [...prev[name], value]
-        : prev[name].filter((item) => item !== value),
+      decorations: checked
+        ? [...prev.decorations, value]
+        : prev.decorations.filter((item) => item !== value),
     }));
   };
 
   // Handle file input change for cake design image
   const handleFileChange = (e) => {
-    setCustomization((prev) => ({
-      ...prev,
-      designImage: e.target.files[0],
-    }));
+    setCustomization((prev) => ({ ...prev, designImage: e.target.files[0] }));
+  };
+
+  // Form validation
+  const validateForm = () => {
+    if (!customization.flavor && !customization.customFlavor) {
+      setError('Please select or enter a flavor for your cake.');
+      return false;
+    }
+    if (!customization.icingType) {
+      setError('Please select an icing type.');
+      return false;
+    }
+    if (!customization.shape) {
+      setError('Please select a cake shape.');
+      return false;
+    }
+    return true;
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!validateForm()) return;
+
     try {
       const formData = new FormData();
       Object.keys(customization).forEach((key) => {
-        if (key === 'designImage') {
-          if (customization[key]) {
-            formData.append(key, customization[key]);
-          }
+        if (key === 'designImage' && customization[key]) {
+          formData.append(key, customization[key]);
         } else if (Array.isArray(customization[key])) {
           customization[key].forEach((item) => formData.append(key, item));
         } else {
@@ -74,13 +94,14 @@ function Customize() {
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
+
       if (response.status === 201) {
         alert('Customization saved successfully!');
         navigate('/cart', { state: { customizationId: response.data._id } });
       }
     } catch (error) {
       console.error('Error saving customization:', error);
-      alert('Failed to save customization. Please try again.');
+      setError('Failed to save customization. Please try again.');
     }
   };
 
@@ -89,53 +110,81 @@ function Customize() {
     setCustomization({
       flavor: location.state?.flavor || '',
       customFlavor: '',
-      sizeInKgs: '',
+      sizeInKgs: '1',
       decorations: [],
       icingType: '',
       shape: '',
       message: '',
-      AdditionalDescription: '',
-      preferredColors: '',
+      additionalDescription: '',
+      preferredColors: [],
       designImage: null,
     });
+    setError('');
   };
-        return (
-    <div className="container" style={{ backgroundColor: '#f5e1a4', minHeight: '100vh', padding: '20px', borderRadius: '8px' }}>
-      <h1 className="text-center" style={{ color: '#3e2c41', marginTop: '2rem' }}>Customize Your Cake</h1>
-      <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
-        Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
+
+  return (
+    <div
+      className="container mt-5 p-4"
+      style={{
+        backgroundColor: '#f5e1a4',
+        minHeight: '100vh',
+        borderRadius: '8px',
+      }}
+    >
+      <h1 className="text-center" style={{ color: '#3e2c41' }}>
+        Customize Your Cake
+      </h1>
+      <p
+        className="text-center lead mb-4"
+        style={{ color: '#3e2c41', fontStyle: 'italic' }}
+      >
+         Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Icing Type */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Icing</label>
-          <select className="form-select" name="icingType" value={formData.icingType} onChange={handleChange}>
-            <option value="Soft icing">Soft icing</option>
-            <option value="Hard icing">Hard icing</option>
-            <option value="Fresh cream">Fresh cream</option>
-          </select>
+        <div className="row">
+          {/* Icing Type */}
+          <div className="col-md-6 mb-3">
+            <label className="form-label" style={{ color: '#3e2c41' }}>
+              Select Icing
+            </label>
+            <select
+              className="form-select"
+              name="icingType"
+              value={customization.icingType}
+              onChange={handleInputChange}
+            >
+              <option value="">Choose...</option>
+              <option value="Soft icing">Soft icing</option>
+              <option value="Hard icing">Hard icing</option>
+              <option value="Fresh cream">Fresh cream</option>
+            </select>
+          </div>
+
+          {/* Cake Size */}
+          <div className="col-md-6 mb-3">
+            <label className="form-label" style={{ color: '#3e2c41' }}>
+              Select Cake Size (kg)
+            </label>
+            <input
+              type="range"
+              className="form-range"
+              name="sizeInKgs"
+              min="0.5"
+              max="15"
+              step="0.5"
+              value={customization.sizeInKgs}
+              onChange={handleInputChange}
+            />
+            <p className="text-center" style={{ color: '#3e2c41' }}>
+              {customization.sizeInKgs} kg
+            </p>
+          </div>
         </div>
 
-        {/* Cake Size */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>Select Cake Size (kg)</label>
-          <input
-            type="range"
-            className="form-range"
-            name="sizeInKgs"
-            min="0.5"
-            max="15"
-            step="0.5"
-            value={formData.sizeInKgs}
-            onChange={handleChange}
-          />
-          <p className="text-center" style={{ color: '#3e2c41' }}>{formData.sizeInKgs} kg</p>
-        </div>
-
-        {/* Cake Flavor Selection */}
+       {/* Cake Flavor Selection */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>Select Up to 3 Cake Flavors</label>
           <select multiple className="form-select" value={flavors} onChange={handleFlavorChange}>
@@ -279,10 +328,22 @@ function Customize() {
           <input type="file" className="form-control" onChange={handleFileUpload} style={{ borderColor: '#3e2c41' }} />
         </div>
 
-        {/* Submit and Reset Buttons */}
+        {/* Buttons */}
         <div className="d-flex justify-content-center gap-3 mt-4">
-          <button type="button" onClick={handleReset} className="btn btn-outline-secondary">Reset Customization</button>
-          <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}>Submit Customized Cake</button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="btn btn-outline-secondary"
+          >
+            Reset Customization
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ backgroundColor: '#3e2c41', borderColor: '#3e2c41' }}
+          >
+            Submit Customized Cake
+          </button>
         </div>
       </form>
     </div>
@@ -290,3 +351,4 @@ function Customize() {
 }
 
 export default Customize;
+
