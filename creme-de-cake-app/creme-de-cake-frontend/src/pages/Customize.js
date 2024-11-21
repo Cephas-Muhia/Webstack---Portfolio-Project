@@ -233,7 +233,6 @@ function Customize() {
               {customization.sizeInKgs} kg
             </p>
           </div>
-        </div>
 
         {/* Cake Shape Selection */}
         <div className="mb-4">
