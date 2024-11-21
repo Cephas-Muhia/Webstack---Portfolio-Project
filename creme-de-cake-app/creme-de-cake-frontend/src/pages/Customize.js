@@ -160,14 +160,14 @@ function Customize() {
         Customize Your Cake
       </h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
-         Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
+        Unleash Your Creativity! 🍰✨ Design the cake of your dreams.
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
       {isSubmitting && <div className="text-center text-warning">Submitting...</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Flavor Selection */}
+       {/* Flavor Selection */}
         <div className="mb-3">
           <label className="form-label">Choose Cake Flavors (Up to 3)</label>
           <div>
@@ -385,7 +385,7 @@ function Customize() {
           >
             {isSubmitting ? 'Saving...' : 'Submit Custom Cake'}
           </button>
-        </div>        
+        </div>    
       </form>
     </div>
   );

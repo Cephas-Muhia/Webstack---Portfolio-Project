@@ -1,77 +1,68 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const router = express.Router();
+const multer = require('multer');
 const Customization = require('../models/Customization');
-const Cake = require('../models/Cake');  
+const router = express.Router();
 
-// POST request to create a new customization (for both Catalogue and Customize page)
-router.post('/', async (req, res) => {
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/designs/'); // Specify upload directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+
+// Create a new customization
+router.post('/', upload.single('designImage'), async (req, res) => {
+  try {
     const {
-        flavor,
-        customFlavor = '', // Default empty string if no custom flavor is provided
-        sizeInKgs = 1, // Default size in kg if not provided
-        decorations = [], // Default empty array if no decorations are selected
-        icingType = 'Soft icing', // Default icing type
-        shape = 'Round', // Default shape
-        message = '', // Default empty string for the message
-        AdditionalDescription = '', // Default empty string for additional description
-        preferredColors = [], // Default empty array for preferred colors
-        designImage = null, // Default null for design image if not provided
-        user = null // Default null for user if not provided
+      flavors,
+      customFlavor,
+      sizeInKgs,
+      decorations,
+      icingType,
+      shape,
+      message,
+      additionalDescription,
+      preferredColors,
     } = req.body;
 
-    try {
-        // Validate required fields
-        if (!flavor || flavor.length === 0) {
-            return res.status(400).json({ error: 'At least one flavor is required' });
-        }
+    const customization = new Customization({
+      flavors: JSON.parse(flavors || '[]'),
+      customFlavor,
+      sizeInKgs: parseFloat(sizeInKgs),
+      decorations: JSON.parse(decorations || '[]'),
+      icingType,
+      shape,
+      message,
+      additionalDescription,
+      preferredColors: JSON.parse(preferredColors || '[]'),
+      designImage: req.file ? req.file.path : null, // Save file path if uploaded
+    });
 
-        // Create a new cake if no cakeId is provided
-        let cakeId;
-        if (!req.body.cakeId) {
-            // Assuming you can create a new Cake instance with default or user-specified data
-            const newCake = new Cake({
-                name: "New Cake", // Set default or dynamic name
-                description: "Default Cake Description", // Default or dynamic description
-                basePrice: 500, // Default base price or dynamic calculation
-                sizeInKgs: sizeInKgs, // Size passed in customization
-                // Add any other default fields or logic for the cake creation
-            });
+    await customization.save();
+    res.status(201).json({ message: 'Customization saved!', _id: customization._id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error saving customization.' });
+  }
+});
 
-            const savedCake = await newCake.save();
-            cakeId = savedCake._id; // Get the newly created cake ID
-        } else {
-            cakeId = req.body.cakeId; // Use the provided cakeId if it's given
-        }
-
-        // Process the user field to ensure a valid ObjectId or set it to null
-        const userId = user && mongoose.Types.ObjectId.isValid(user) ? mongoose.Types.ObjectId(user) : null;
-
-        // Create a new customization object
-        const newCustomization = new Customization({
-            flavor,
-            customFlavor,
-            sizeInKgs,
-            decorations,
-            icingType,
-            shape,
-            message,
-            AdditionalDescription,
-            preferredColors,
-            designImage,
-            user: userId,
-            cakeId: mongoose.Types.ObjectId(cakeId) // Ensure cakeId is valid
-        });
-
-        // Save the new customization to the database
-        const savedCustomization = await newCustomization.save();
-
-        // Return the saved customization's ID to the frontend
-        res.status(201).json(savedCustomization);
-    } catch (error) {
-        console.error('Error creating customization:', error);
-        res.status(500).json({ error: 'Failed to create customization' });
+// Get customization by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const customization = await Customization.findById(req.params.id);
+    if (!customization) {
+      return res.status(404).json({ error: 'Customization not found.' });
     }
+    res.status(200).json(customization);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error fetching customization.' });
+  }
 });
 
 module.exports = router;
+
