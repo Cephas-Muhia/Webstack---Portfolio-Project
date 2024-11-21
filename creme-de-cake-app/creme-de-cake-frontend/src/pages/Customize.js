@@ -6,14 +6,6 @@ function Customize() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const availableFlavors = [
-    'Marble', 'Vanilla', 'Orange', 'Banana', 'Pinacolada', 'Fruit',
-    'Lemon', 'Red Velvet', 'Chocolate', 'Black Forest', 'White Forest',
-    'Eggless', 'Pineapple', 'Blueberry', 'Coffee', 'Cheesecake',
-    'Carrot', 'Coconut', 'Fudge', 'Mint', 'Chocolate Chip',
-    'Royal Velvet', 'Amarula', 'Strawberry',
-  ];
-
   const [customization, setCustomization] = useState({
     flavors: [],
     customFlavor: '',
@@ -30,8 +22,17 @@ function Customize() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const availableFlavors = [
+    'Marble', 'Vanilla', 'Orange', 'Banana', 'Pinacolada', 'Fruit',
+    'Lemon', 'Red Velvet', 'Chocolate', 'Black Forest', 'White Forest',
+    'Eggless', 'Pineapple', 'Blueberry', 'Coffee', 'Cheesecake',
+    'Carrot', 'Coconut', 'Fudge', 'Mint', 'Chocolate Chip',
+    'Royal Velvet', 'Amarula', 'Strawberry',
+  ];
+
+  // Populate initial flavors if passed via location state
   useEffect(() => {
-    if (location.state && location.state.flavor) {
+    if (location.state?.flavor) {
       setCustomization((prev) => ({
         ...prev,
         flavors: [location.state.flavor],
@@ -39,9 +40,20 @@ function Customize() {
     }
   }, [location.state]);
 
+  // Utility Functions
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCustomization((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    setCustomization((prev) => ({
+      ...prev,
+      decorations: checked
+        ? [...prev.decorations, value]
+        : prev.decorations.filter((item) => item !== value),
+    }));
   };
 
   const handleFlavorChange = (flavor) => {
@@ -55,16 +67,6 @@ function Customize() {
     });
   };
 
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    setCustomization((prev) => ({
-      ...prev,
-      decorations: checked
-        ? [...prev.decorations, value]
-        : prev.decorations.filter((item) => item !== value),
-    }));
-  };
-
   const handleFileChange = (e) => {
     setCustomization((prev) => ({
       ...prev,
@@ -72,8 +74,22 @@ function Customize() {
     }));
   };
 
+  const createFormData = () => {
+    const formData = new FormData();
+    Object.keys(customization).forEach((key) => {
+      if (key === 'designImage' && customization[key]) {
+        formData.append(key, customization[key]);
+      } else if (Array.isArray(customization[key])) {
+        customization[key].forEach((item) => formData.append(key, item));
+      } else {
+        formData.append(key, customization[key]);
+      }
+    });
+    return formData;
+  };
+
   const validateForm = () => {
-    if (customization.flavors.length === 0 && !customization.customFlavor) {
+    if (!customization.flavors.length && !customization.customFlavor) {
       setError('Please select or enter at least one flavor.');
       return false;
     }
@@ -92,20 +108,6 @@ function Customize() {
     return true;
   };
 
-  const createFormData = () => {
-    const formData = new FormData();
-    Object.keys(customization).forEach((key) => {
-      if (key === 'designImage' && customization[key]) {
-        formData.append(key, customization[key]);
-      } else if (Array.isArray(customization[key])) {
-        customization[key].forEach((item) => formData.append(key, item));
-      } else {
-        formData.append(key, customization[key]);
-      }
-    });
-    return formData;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -118,7 +120,6 @@ function Customize() {
 
     try {
       const formData = createFormData();
-
       const response = await axios.post(
         'http://localhost:5000/api/customizations',
         formData,
@@ -129,8 +130,8 @@ function Customize() {
         alert('Customization saved successfully!');
         navigate('/cart', { state: { customizationId: response.data._id } });
       }
-    } catch (error) {
-      console.error('Error saving customization:', error);
+    } catch (err) {
+      console.error('Error saving customization:', err);
       setError('Failed to save customization. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -154,60 +155,45 @@ function Customize() {
   };
 
   return (
-    <div
-      className="container mt-5 p-4 shadow"
-      style={{
-        backgroundColor: '#f5e1a4',
-        borderRadius: '8px',
-        minHeight: '100vh',
-      }}
-    >
+    <div className="container mt-5 p-4 shadow" style={{ backgroundColor: '#f5e1a4', borderRadius: '8px', minHeight: '100vh' }}>
       <h1 className="text-center" style={{ color: '#3e2c41', fontWeight: 'bold' }}>
         Customize Your Cake
       </h1>
       <p className="text-center lead mb-4" style={{ color: '#3e2c41' }}>
-        Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
+         Unleash Your Creativity! 🍰✨ Design the cake of your dreams by choosing your icing, size, decorations, colors, and more. Make it uniquely yours—because every celebration deserves a custom touch!
       </p>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
       {isSubmitting && <div className="text-center text-warning">Submitting...</div>}
 
       <form onSubmit={handleSubmit}>
-       <div className="row">
-          {/* Flavor Selection */}
-          <div className="col-md-6 mb-3">
-            <label className="form-label" style={{ color: '#3e2c41' }}>
-              Choose Cake Flavor(s) (Up to 3)
-            </label>
-            <div>
-              {availableFlavors.map((flavor, index) => (
-                <div key={index} className="form-check form-check-inline">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={`flavor-${flavor}`}
-                    value={flavor}
-                    checked={customization.flavors.includes(flavor)}
-                    onChange={() => handleFlavorChange(flavor)}
-                  />
-                  <label className="form-check-label" htmlFor={`flavor-${flavor}`}>
-                    {flavor}
-                  </label>
-                </div>
-              ))}
-            </div>
-            {/* Custom Flavor Input */}
-            <input
-              type="text"
-              className="form-control mt-2"
-              name="customFlavor"
-              value={customization.customFlavor}
-              onChange={handleInputChange}
-              placeholder="Enter your custom flavor"
-            />
+        {/* Flavor Selection */}
+        <div className="mb-3">
+          <label className="form-label">Choose Cake Flavors (Up to 3)</label>
+          <div>
+            {availableFlavors.map((flavor, index) => (
+              <div key={index} className="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  value={flavor}
+                  checked={customization.flavors.includes(flavor)}
+                  onChange={() => handleFlavorChange(flavor)}
+                />
+                <label className="form-check-label">{flavor}</label>
+              </div>
+            ))}
           </div>
-
-          {/* Icing Type */}
+          <input
+            type="text"
+            className="form-control mt-2"
+            name="customFlavor"
+            value={customization.customFlavor}
+            onChange={handleInputChange}
+            placeholder="Enter your custom flavor"
+          />
+        </div>
+         {/* Icing Type */}
           <div className="col-md-6 mb-3">
             <label className="form-label" style={{ color: '#3e2c41' }}>
               Select Icing
@@ -399,7 +385,7 @@ function Customize() {
           >
             {isSubmitting ? 'Saving...' : 'Submit Custom Cake'}
           </button>
-        </div>
+        </div>        
       </form>
     </div>
   );
