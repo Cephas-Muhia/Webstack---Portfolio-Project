@@ -155,7 +155,10 @@ function Customize() {
   };
 
   return (
-    <div className="container mt-5 p-4 shadow" style={{ backgroundColor: '#f5e1a4', borderRadius: '8px', minHeight: '100vh' }}>
+    <div
+      className="container mt-5 p-4 shadow"
+      style={{ backgroundColor: '#f5e1a4', borderRadius: '8px', minHeight: '100vh' }}
+    >
       <h1 className="text-center" style={{ color: '#3e2c41', fontWeight: 'bold' }}>
         Customize Your Cake
       </h1>
@@ -369,23 +372,14 @@ function Customize() {
           />
         </div>
 
-          <div className="d-flex justify-content-between mt-4">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleReset}
-            disabled={isSubmitting}
-          >
+        <div className="d-flex justify-content-between">
+          <button type="button" className="btn btn-secondary" onClick={handleReset}>
             Reset Customization
           </button>
-          <button
-            type="submit"
-            className="btn btn-success"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Submit Custom Cake'}
+          <button type="submit" className="btn btn-primary">
+            Submit Customized Cake
           </button>
-        </div>    
+        </div>
       </form>
     </div>
   );
