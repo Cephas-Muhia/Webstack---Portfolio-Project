@@ -193,7 +193,7 @@ function Customize() {
         
                {/* Flavor Selection */}
         <div className="mb-3">
-          <label className="form-label">Choose a Cake Flavor, or a combination of (Up to 3) Cake Flavors</label>
+          <label className="form-label">Choose a Cake Flavor, or a combination of (Up to 3) Cake Flavors.</label>
           <div>
             {availableFlavors.map((flavor, index) => (
               <div key={index} className="form-check form-check-inline">
@@ -214,7 +214,7 @@ function Customize() {
             name="customFlavor"
             value={customization.customFlavor}
             onChange={handleInputChange}
-            placeholder="Didn't see your preffered flavor?, Enter your custom flavor"
+            placeholder="Didn't see your preffered flavor?, Enter your custom flavor."
           />
         </div>
          {/* Icing Type */}
@@ -278,7 +278,7 @@ function Customize() {
         {/* Decoration Extras */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>
-            Choose Celebration Extras
+            Choose your preferred Celebration Extras.
           </label>
           <div>
             <div className="form-check form-check-inline">
