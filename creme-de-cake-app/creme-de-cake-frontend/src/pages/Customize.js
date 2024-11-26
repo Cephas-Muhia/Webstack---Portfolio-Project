@@ -15,7 +15,7 @@ function Customize() {
     shape: '',
     message: '',
     additionalDescription: '',
-    preferredColors: [],
+    preferredColors: '',
     designImage: null,
   });
 
@@ -30,7 +30,6 @@ function Customize() {
     'Royal Velvet', 'Amarula', 'Strawberry',
   ];
 
-  // Populate initial flavors if passed via location state
   useEffect(() => {
     if (location.state?.flavor) {
       setCustomization((prev) => ({
@@ -40,7 +39,6 @@ function Customize() {
     }
   }, [location.state]);
 
-  // Utility Functions
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCustomization((prev) => ({ ...prev, [name]: value }));
@@ -79,6 +77,13 @@ function Customize() {
     Object.keys(customization).forEach((key) => {
       if (key === 'designImage' && customization[key]) {
         formData.append(key, customization[key]);
+      } else if (key === 'preferredColors') {
+        // Convert colors string to comma-separated array
+        const colorsArray = customization.preferredColors
+          .split(',')
+          .map((color) => color.trim())
+          .filter((color) => color !== '');
+        colorsArray.forEach((color) => formData.append(key, color));
       } else if (Array.isArray(customization[key])) {
         customization[key].forEach((item) => formData.append(key, item));
       } else {
@@ -109,47 +114,40 @@ function Customize() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setIsSubmitting(true);
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
 
-  // Validate the form before submission
-  if (!validateForm()) {
-    setIsSubmitting(false);
-    return;
-  }
-
-  try {
-    // Create FormData object with user input
-    const formData = createFormData();
-
-    // Log the payload for debugging
-    console.log('Payload being sent:');
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
     }
 
-    // Send POST request with form data
-    const response = await axios.post(
-      'http://localhost:5000/api/customizations',
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    );
+    try {
+      const formData = createFormData();
 
-    // Handle successful response
-    if (response.status === 201) {
-      alert('Customization saved successfully!');
-      navigate('/cart', { state: { customizationId: response.data._id } });
+      console.log('Payload being sent:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      const response = await axios.post(
+        'http://localhost:5000/api/customizations',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+
+      if (response.status === 201) {
+        alert('Customization saved successfully!');
+        navigate('/cart', { state: { customizationId: response.data._id } });
+      }
+    } catch (err) {
+      console.error('Error saving customization:', err);
+      setError('Failed to save customization. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (err) {
-    // Log error and set user-friendly message
-    console.error('Error saving customization:', err);
-    setError('Failed to save customization. Please try again.');
-  } finally {
-    // Reset the submission state
-    setIsSubmitting(false);
-  }
-};
+  };
 
   const handleReset = () => {
     setCustomization({
@@ -324,22 +322,29 @@ function Customize() {
         </div>
 
         {/* Preferred Colors */}
-        <div className="mb-4">
-          <label className="form-label" style={{ color: '#3e2c41' }}>
-            Preferred Cake Colors
-          </label>
-          <input
+       <div className="mb-4">
+         <label className="form-label" style={{ color: '#3e2c41' }}>
+           Preferred Cake Colors
+           </label>
+           <input
             type="text"
             className="form-control"
             name="preferredColors"
             value={customization.preferredColors.join(', ')}
-            onChange={(e) => {
-              const colors = e.target.value.split(',').map((item) => item.trim());
-              setCustomization((prev) => ({ ...prev, preferredColors: colors }));
-            }}
-            placeholder="Enter preferred colors (comma separated)"
-          />
-        </div>
+          onChange={(e) => {
+        const colors = e.target.value.split(',').map((color) => color.trim());
+            setCustomization((prev) => ({
+             ...prev,
+             preferredColors: colors.filter((color) => color !== ''), // Ensure no empty entries
+           }));
+           }}
+              placeholder="Enter preferred colors (comma separated)"
+            />
+          <small className="text-muted">
+        Example: "Red, Blue, Gold". Use commas to separate multiple colors.
+      </small>
+       </div>
+
 
         {/* Custom Message */}
         <div className="mb-4">
