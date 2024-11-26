@@ -109,34 +109,47 @@ function Customize() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
+  e.preventDefault();
+  setError('');
+  setIsSubmitting(true);
 
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
+  // Validate the form before submission
+  if (!validateForm()) {
+    setIsSubmitting(false);
+    return;
+  }
+
+  try {
+    // Create FormData object with user input
+    const formData = createFormData();
+
+    // Log the payload for debugging
+    console.log('Payload being sent:');
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
     }
 
-    try {
-      const formData = createFormData();
-      const response = await axios.post(
-        'http://localhost:5000/api/customizations',
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+    // Send POST request with form data
+    const response = await axios.post(
+      'http://localhost:5000/api/customizations',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
 
-      if (response.status === 201) {
-        alert('Customization saved successfully!');
-        navigate('/cart', { state: { customizationId: response.data._id } });
-      }
-    } catch (err) {
-      console.error('Error saving customization:', err);
-      setError('Failed to save customization. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    // Handle successful response
+    if (response.status === 201) {
+      alert('Customization saved successfully!');
+      navigate('/cart', { state: { customizationId: response.data._id } });
     }
-  };
+  } catch (err) {
+    // Log error and set user-friendly message
+    console.error('Error saving customization:', err);
+    setError('Failed to save customization. Please try again.');
+  } finally {
+    // Reset the submission state
+    setIsSubmitting(false);
+  }
+};
 
   const handleReset = () => {
     setCustomization({

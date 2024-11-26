@@ -3,64 +3,85 @@ const multer = require('multer');
 const Customization = require('../models/Customization');
 const router = express.Router();
 
-// Multer setup for file uploads
+// Multer configuration for image upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/designs/'); // Specify upload directory
+    cb(null, './uploads'); // Folder to store images
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
-const upload = multer({ storage });
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit: 5MB
+});
 
 // Create a new customization
 router.post('/', upload.single('designImage'), async (req, res) => {
   try {
-    const {
-      flavors,
-      customFlavor,
-      sizeInKgs,
-      decorations,
-      icingType,
-      shape,
-      message,
-      additionalDescription,
-      preferredColors,
+    console.log('Received Payload:', req.body);
+    console.log('Received File:', req.file);
+
+    // Destructure fields from the request body
+    const { 
+      flavors, 
+      customFlavor, 
+      sizeInKgs, 
+      decorations, 
+      icingType, 
+      shape, 
+      message, 
+      additionalDescription, 
+      preferredColors 
     } = req.body;
 
-    const customization = new Customization({
-      flavors: JSON.parse(flavors || '[]'),
-      customFlavor,
-      sizeInKgs: parseFloat(sizeInKgs),
-      decorations: JSON.parse(decorations || '[]'),
-      icingType,
+    // Validate required fields
+    if (!flavors || !sizeInKgs || !shape) {
+      return res.status(400).json({ error: 'Flavors, sizeInKgs, and shape are required.' });
+    }
+
+    // Process preferredColors into an array (handle empty or invalid input gracefully)
+    const colorsArray = preferredColors 
+      ? preferredColors.split(',').map((color) => color.trim()).filter((color) => color !== '') 
+      : [];
+
+    // Create a new customization instance
+    const newCustomization = new Customization({
+      flavors,
+      customFlavor: customFlavor || null,
+      sizeInKgs: parseFloat(sizeInKgs), // Convert size to a float
+      decorations: decorations || null,
+      icingType: icingType || null,
       shape,
-      message,
-      additionalDescription,
-      preferredColors: JSON.parse(preferredColors || '[]'),
-      designImage: req.file ? req.file.path : null, // Save file path if uploaded
+      message: message || '',
+      additionalDescription: additionalDescription || '',
+      preferredColors: colorsArray, // Save colors as an array
+      designImage: req.file ? req.file.path : null, // Save uploaded image path or null
     });
 
-    await customization.save();
-    res.status(201).json({ message: 'Customization saved!', _id: customization._id });
+    // Save to the database
+    const savedCustomization = await newCustomization.save();
+
+    // Respond with the saved customization
+    res.status(201).json(savedCustomization);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error saving customization.' });
+    console.error('Error saving customization:', error);
+    res.status(500).json({ error: 'Failed to save customization.' });
   }
 });
 
-// Get customization by ID
-router.get('/:id', async (req, res) => {
+
+
+// Get all customizations
+router.get('/', async (req, res) => {
   try {
-    const customization = await Customization.findById(req.params.id);
-    if (!customization) {
-      return res.status(404).json({ error: 'Customization not found.' });
-    }
-    res.status(200).json(customization);
+    const customizations = await Customization.find();
+    res.json(customizations);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error fetching customization.' });
+    console.error('Error fetching customizations:', error);
+    res.status(500).json({ error: 'Failed to fetch customizations.' });
   }
 });
 
