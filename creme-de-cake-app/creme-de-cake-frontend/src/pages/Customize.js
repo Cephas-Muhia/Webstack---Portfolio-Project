@@ -15,7 +15,7 @@ function Customize() {
     shape: '',
     message: '',
     additionalDescription: '',
-    preferredColors: '',
+    preferredColors: [], // Changed to an array
     designImage: null,
   });
 
@@ -65,6 +65,12 @@ function Customize() {
     });
   };
 
+  const handlePreferredColorsChange = (e) => {
+    const { value } = e.target;
+    const colorsArray = value.split(',').map((color) => color.trim());
+    setCustomization((prev) => ({ ...prev, preferredColors: colorsArray }));
+  };
+
   const handleFileChange = (e) => {
     setCustomization((prev) => ({
       ...prev,
@@ -77,13 +83,6 @@ function Customize() {
     Object.keys(customization).forEach((key) => {
       if (key === 'designImage' && customization[key]) {
         formData.append(key, customization[key]);
-      } else if (key === 'preferredColors') {
-        // Convert colors string to comma-separated array
-        const colorsArray = customization.preferredColors
-          .split(',')
-          .map((color) => color.trim())
-          .filter((color) => color !== '');
-        colorsArray.forEach((color) => formData.append(key, color));
       } else if (Array.isArray(customization[key])) {
         customization[key].forEach((item) => formData.append(key, item));
       } else {
@@ -112,42 +111,70 @@ function Customize() {
     }
     return true;
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
+  
+  // Helper function to convert FormData to an object
+function formDataToObject(formData) {
+  const obj = {};
+  formData.forEach((value, key) => {
+    // If the key already exists in the object, handle it as an array
+    if (obj[key]) {
+      obj[key] = [].concat(obj[key], value);
+    } else {
+      obj[key] = value;
     }
+  });
 
-    try {
-      const formData = createFormData();
+  // Perform necessary transformations for backend compatibility
+  if (obj.sizeInKgs) {
+    obj.sizeInKgs = parseFloat(obj.sizeInKgs); // Convert size to a number
+  }
+  if (obj.preferredColors && typeof obj.preferredColors === 'string') {
+    obj.preferredColors = obj.preferredColors.split(','); // Convert comma-separated string to an array
+  }
+  if (obj.CelebrationExtras && typeof obj.CelebrationExtras === 'string') {
+    obj.CelebrationExtras = obj.CelebrationExtras.split(','); // Convert to an array
+  }
 
-      console.log('Payload being sent:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
+  return obj;
+}
 
-      const response = await axios.post(
-        'http://localhost:5000/api/customizations',
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setIsSubmitting(true);
 
-      if (response.status === 201) {
-        alert('Customization saved successfully!');
-        navigate('/cart', { state: { customizationId: response.data._id } });
-      }
-    } catch (err) {
-      console.error('Error saving customization:', err);
-      setError('Failed to save customization. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  // Validate the form before proceeding
+  if (!validateForm()) {
+    setIsSubmitting(false);
+    return;
+  }
+
+  // Log the payload to examine what is being sent
+  const formData = createFormData();
+
+  // Convert FormData to an object for backend compatibility
+  const formDataObject = formDataToObject(formData);
+  console.log('Customization Payload:', formDataObject);
+
+  try {
+    const response = await axios.post(
+      'http://localhost:5000/api/customizations',
+      formDataObject, // Use the object instead of FormData
+      { headers: { 'Content-Type': 'application/json' } } // Update content type
+    );
+
+    if (response.status === 201) {
+      alert('Customization saved successfully!');
+      navigate('/cart', { state: { customizationId: response.data._id } });
     }
-  };
+  } catch (err) {
+    console.error('Error saving customization:', err);
+    setError('Failed to save customization. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleReset = () => {
     setCustomization({
@@ -181,7 +208,8 @@ function Customize() {
       {isSubmitting && <div className="text-center text-warning">Submitting...</div>}
 
       <form onSubmit={handleSubmit}>
-       {/* Flavor Selection */}
+        
+               {/* Flavor Selection */}
         <div className="mb-3">
           <label className="form-label">Choose Cake Flavors (Up to 3)</label>
           <div>
@@ -322,29 +350,18 @@ function Customize() {
         </div>
 
         {/* Preferred Colors */}
-       <div className="mb-4">
-         <label className="form-label" style={{ color: '#3e2c41' }}>
-           Preferred Cake Colors
-           </label>
-           <input
+        <div className="mb-4">
+          <label className="form-label" style={{ color: '#3e2c41' }}>
+            Preferred Colors (Comma-separated)
+          </label>
+          <input
             type="text"
             className="form-control"
-            name="preferredColors"
             value={customization.preferredColors.join(', ')}
-          onChange={(e) => {
-        const colors = e.target.value.split(',').map((color) => color.trim());
-            setCustomization((prev) => ({
-             ...prev,
-             preferredColors: colors.filter((color) => color !== ''), // Ensure no empty entries
-           }));
-           }}
-              placeholder="Enter preferred colors (comma separated)"
-            />
-          <small className="text-muted">
-        Example: "Red, Blue, Gold". Use commas to separate multiple colors.
-      </small>
-       </div>
-
+            onChange={handlePreferredColorsChange}
+            placeholder="E.g., red, blue, white"
+          />
+        </div>
 
         {/* Custom Message */}
         <div className="mb-4">
@@ -403,4 +420,3 @@ function Customize() {
 }
 
 export default Customize;
-
