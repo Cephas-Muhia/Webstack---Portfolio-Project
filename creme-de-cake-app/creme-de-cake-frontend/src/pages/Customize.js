@@ -15,7 +15,7 @@ function Customize() {
     shape: '',
     message: '',
     additionalDescription: '',
-    preferredColors: [], // Changed to an array
+    preferredColors: [],
     designImage: null,
   });
 
@@ -79,18 +79,33 @@ function Customize() {
   };
 
   const createFormData = () => {
-    const formData = new FormData();
-    Object.keys(customization).forEach((key) => {
-      if (key === 'designImage' && customization[key]) {
-        formData.append(key, customization[key]);
-      } else if (Array.isArray(customization[key])) {
-        customization[key].forEach((item) => formData.append(key, item));
-      } else {
-        formData.append(key, customization[key]);
-      }
-    });
-    return formData;
-  };
+  const formData = new FormData();
+
+  // Loop through customization object keys
+  Object.keys(customization).forEach((key) => {
+    if (key === 'designImage' && customization[key]) {
+      // Append designImage directly if it exists
+      formData.append(key, customization[key]);
+    } else if (key === 'preferredColors' && Array.isArray(customization[key])) {
+      // Convert preferredColors array into a JSON string
+      formData.append(key, JSON.stringify(customization[key]));
+    } else if (Array.isArray(customization[key])) {
+      // Handle other array fields
+      customization[key].forEach((item) => formData.append(key, item));
+    } else if (customization[key] !== null && customization[key] !== undefined) {
+      // Append all other key-value pairs
+      formData.append(key, customization[key]);
+    }
+  });
+
+  // Debugging: Log all FormData key-value pairs
+  console.log('FormData contents:');
+  for (let pair of formData.entries()) {
+    console.log(`${pair[0]}: ${pair[1]}`);
+  }
+
+  return formData;
+};
 
   const validateForm = () => {
     if (!customization.flavors.length && !customization.customFlavor) {
@@ -111,70 +126,37 @@ function Customize() {
     }
     return true;
   };
-  
-  // Helper function to convert FormData to an object
-function formDataToObject(formData) {
-  const obj = {};
-  formData.forEach((value, key) => {
-    // If the key already exists in the object, handle it as an array
-    if (obj[key]) {
-      obj[key] = [].concat(obj[key], value);
-    } else {
-      obj[key] = value;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
     }
-  });
 
-  // Perform necessary transformations for backend compatibility
-  if (obj.sizeInKgs) {
-    obj.sizeInKgs = parseFloat(obj.sizeInKgs); // Convert size to a number
-  }
-  if (obj.preferredColors && typeof obj.preferredColors === 'string') {
-    obj.preferredColors = obj.preferredColors.split(','); // Convert comma-separated string to an array
-  }
-  if (obj.CelebrationExtras && typeof obj.CelebrationExtras === 'string') {
-    obj.CelebrationExtras = obj.CelebrationExtras.split(','); // Convert to an array
-  }
+    const formData = createFormData();
 
-  return obj;
-}
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/customizations',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setIsSubmitting(true);
-
-  // Validate the form before proceeding
-  if (!validateForm()) {
-    setIsSubmitting(false);
-    return;
-  }
-
-  // Log the payload to examine what is being sent
-  const formData = createFormData();
-
-  // Convert FormData to an object for backend compatibility
-  const formDataObject = formDataToObject(formData);
-  console.log('Customization Payload:', formDataObject);
-
-  try {
-    const response = await axios.post(
-      'http://localhost:5000/api/customizations',
-      formDataObject, // Use the object instead of FormData
-      { headers: { 'Content-Type': 'application/json' } } // Update content type
-    );
-
-    if (response.status === 201) {
-      alert('Customization saved successfully!');
-      navigate('/cart', { state: { customizationId: response.data._id } });
+      if (response.status === 201) {
+        alert('Customization saved successfully!');
+        navigate('/cart', { state: { customizationId: response.data._id } });
+      }
+    } catch (err) {
+      console.error('Error details:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Failed to save customization. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (err) {
-    console.error('Error saving customization:', err);
-    setError('Failed to save customization. Please try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   const handleReset = () => {
     setCustomization({
@@ -211,7 +193,7 @@ const handleSubmit = async (e) => {
         
                {/* Flavor Selection */}
         <div className="mb-3">
-          <label className="form-label">Choose Cake Flavors (Up to 3)</label>
+          <label className="form-label">Choose a Cake Flavor, or a combination of (Up to 3) Cake Flavors</label>
           <div>
             {availableFlavors.map((flavor, index) => (
               <div key={index} className="form-check form-check-inline">
@@ -232,7 +214,7 @@ const handleSubmit = async (e) => {
             name="customFlavor"
             value={customization.customFlavor}
             onChange={handleInputChange}
-            placeholder="Enter your custom flavor"
+            placeholder="Didn't see your preffered flavor?, Enter your custom flavor"
           />
         </div>
          {/* Icing Type */}
@@ -246,7 +228,7 @@ const handleSubmit = async (e) => {
               value={customization.icingType}
               onChange={handleInputChange}
             >
-              <option value="">Choose...</option>
+              <option value="">Choose Icing Type ...</option>
               <option value="Soft icing">Soft icing</option>
               <option value="Hard icing">Hard icing</option>
               <option value="Fresh cream">Fresh cream</option>
@@ -285,6 +267,7 @@ const handleSubmit = async (e) => {
             onChange={handleInputChange}
             style={{ borderColor: '#3e2c41' }}
           >
+            <option value="">Choose Cake Shape of your Liking ...</option>
             <option value="Round">Round</option>
             <option value="Square">Square</option>
             <option value="Stacked">Stacked</option>
@@ -352,7 +335,7 @@ const handleSubmit = async (e) => {
         {/* Preferred Colors */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>
-            Preferred Colors (Comma-separated)
+            What are your Preferred Colors?. (Comma-separated)
           </label>
           <input
             type="text"
@@ -366,7 +349,7 @@ const handleSubmit = async (e) => {
         {/* Custom Message */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>
-            Custom Message
+            Kindly enter a custom Message which you would like to see on your cake.
           </label>
           <textarea
             className="form-control"
@@ -381,7 +364,7 @@ const handleSubmit = async (e) => {
         {/* Cake Design Image */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>
-            Upload Cake Design Image
+            Upload Cake Design Image of how you envision your cake to look like.
           </label>
           <input
             type="file"
@@ -394,7 +377,7 @@ const handleSubmit = async (e) => {
         {/* Additional Description */}
         <div className="mb-4">
           <label className="form-label" style={{ color: '#3e2c41' }}>
-            Additional Description
+           What other Additional Description would you like to be considered during your cake preparation?.
           </label>
           <textarea
             className="form-control"
