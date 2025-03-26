@@ -21,8 +21,8 @@ const upload = multer({
 // Create a new customization
 router.post('/', upload.single('designImage'), async (req, res) => {
   try {
-    console.log('Received Payload:', req.body); // For debugging purposes
-    console.log('Received File:', req.file); // For debugging purposes
+    console.log('Received Payload:', req.body); // Debugging purposes
+    console.log('Received File:', req.file); // Debugging purposes
 
     // Destructure fields from the request body
     const {
@@ -44,27 +44,25 @@ router.post('/', upload.single('designImage'), async (req, res) => {
 
     // Process preferredColors into an array (handle empty or invalid input gracefully)
     const colorsArray = preferredColors
-      ? preferredColors.split(',').map((color) => color.trim()).filter((color) => color !== '')
+      ? preferredColors.split(',').map(color => color.trim()).filter(color => color !== '')
       : [];
 
     // Create a new customization instance
     const newCustomization = new Customization({
       flavors,
-      customFlavor: customFlavor || null, // If no custom flavor, store as null
-      sizeInKgs: parseFloat(sizeInKgs), // Convert size to a float
-      decorations: decorations || null, // If no decoration, store as null
-      icingType: icingType || null, // If no icing type, store as null
+      customFlavor: customFlavor || null, // Store as null if empty
+      sizeInKgs: parseFloat(sizeInKgs), // Convert size to float
+      decorations: decorations || null,
+      icingType: icingType || null,
       shape,
-      message: message || '', // Default to empty string if no message
-      additionalDescription: additionalDescription || '', // Default to empty string if no description
-      preferredColors: colorsArray, // Save colors as an array
-      designImage: req.file ? req.file.path : null, // Save uploaded image path or null
+      message: message || '',
+      additionalDescription: additionalDescription || '',
+      preferredColors: colorsArray,
+      designImage: req.file ? req.file.path : null, // Save uploaded image path
     });
 
-    // Save the customization to the database
+    // Save to the database
     const savedCustomization = await newCustomization.save();
-
-    // Respond with the saved customization
     res.status(201).json(savedCustomization);
   } catch (error) {
     console.error('Error saving customization:', error);

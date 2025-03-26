@@ -55,15 +55,17 @@ function Customize() {
   };
 
   const handleFlavorChange = (flavor) => {
-    setCustomization((prev) => {
-      const updatedFlavors = prev.flavors.includes(flavor)
-        ? prev.flavors.filter((f) => f !== flavor)
-        : [...prev.flavors, flavor];
-      return updatedFlavors.length <= 3
-        ? { ...prev, flavors: updatedFlavors }
-        : { ...prev };
-    });
-  };
+  setCustomization((prev) => {
+    if (prev.flavors.includes(flavor)) {
+      return { ...prev, flavors: prev.flavors.filter((f) => f !== flavor) };
+    }
+    if (prev.flavors.length >= 3) {
+      alert('You can only select up to 3 flavors.');
+      return prev;
+    }
+    return { ...prev, flavors: [...prev.flavors, flavor] };
+  });
+};
 
   const handlePreferredColorsChange = (e) => {
     const { value } = e.target;
@@ -83,23 +85,29 @@ function Customize() {
 
   // Loop through customization object keys
   Object.keys(customization).forEach((key) => {
-    if (key === 'designImage' && customization[key]) {
-      // Append designImage directly if it exists
-      formData.append(key, customization[key]);
-    } else if (key === 'preferredColors' && Array.isArray(customization[key])) {
-      // Convert preferredColors array into a JSON string
-      formData.append(key, JSON.stringify(customization[key]));
-    } else if (Array.isArray(customization[key])) {
-      // Handle other array fields
-      customization[key].forEach((item) => formData.append(key, item));
-    } else if (customization[key] !== null && customization[key] !== undefined) {
-      // Append all other key-value pairs
-      formData.append(key, customization[key]);
+    const value = customization[key];
+
+    // Handle file upload for designImage
+    if (key === "designImage" && value instanceof File) {
+      console.log("Design Image Details:", value.name, value.size, value.type); // Log file details
+      formData.append(key, value);
+    } 
+    // Handle preferredColors as a JSON string
+    else if (key === "preferredColors" && Array.isArray(value)) {
+      formData.append(key, JSON.stringify(value));
+    } 
+    // Handle other non-empty arrays
+    else if (Array.isArray(value) && value.length > 0) {
+      value.forEach((item) => formData.append(key, item));
+    } 
+    // Handle other fields
+    else if (value !== null && value !== undefined) {
+      formData.append(key, value);
     }
   });
 
   // Debugging: Log all FormData key-value pairs
-  console.log('FormData contents:');
+  console.log("FormData contents:");
   for (let pair of formData.entries()) {
     console.log(`${pair[0]}: ${pair[1]}`);
   }
@@ -107,56 +115,64 @@ function Customize() {
   return formData;
 };
 
-  const validateForm = () => {
-    if (!customization.flavors.length && !customization.customFlavor) {
-      setError('Please select or enter at least one flavor.');
-      return false;
-    }
-    if (!customization.icingType) {
-      setError('Please select an icing type.');
-      return false;
-    }
-    if (!customization.shape) {
-      setError('Please select a cake shape.');
-      return false;
-    }
-    if (customization.designImage && customization.designImage.size > 5 * 1024 * 1024) {
-      setError('Uploaded image size must be less than 5MB.');
-      return false;
-    }
-    return true;
-  };
+const validateForm = () => {
+  if (!customization.flavors?.length && !customization.customFlavor) {
+    setError("Please select or enter at least one flavor.");
+    return false;
+  }
+  if (!customization.icingType.trim()) {
+        setError('Please select an icing type.');
+          return false;
+  }
+  if (!customization.shape.trim()) {
+        setError('Please select a cake shape.');
+          return false;
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
+  if (
+    customization.designImage &&
+    customization.designImage.size > 5 * 1024 * 1024
+  ) {
+    setError("Uploaded image size must be less than 5MB.");
+    return false;
+  }
+  return true;
+};
 
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setIsSubmitting(true);
+
+  if (!validateForm()) {
+    setIsSubmitting(false);
+    return;
+  }
+
+  const formData = createFormData();
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/customizations",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 201) {
+      alert("Customization saved successfully!");
+      navigate("/cart", { state: { customizationId: response.data._id } });
     }
+  } catch (err) {
+    console.error("Error details:", err.response?.data || err.message);
+    setError(
+      err.response?.data?.message ||
+        "Failed to save customization. Please try again."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
-    const formData = createFormData();
-
-    try {
-      const response = await axios.post(
-        'http://localhost:5000/api/customizations',
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
-
-      if (response.status === 201) {
-        alert('Customization saved successfully!');
-        navigate('/cart', { state: { customizationId: response.data._id } });
-      }
-    } catch (err) {
-      console.error('Error details:', err.response?.data || err.message);
-      setError(err.response?.data?.message || 'Failed to save customization. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleReset = () => {
     setCustomization({

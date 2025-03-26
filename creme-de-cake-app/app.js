@@ -40,7 +40,6 @@ app.get('*', (req, res) => {
 
 // Serve static files from the frontend
 app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/dist')));
-app.use(express.static(path.join(__dirname, 'creme-de-cake-frontend/build')));
 
 // API routes
 // Use the authentication routes
